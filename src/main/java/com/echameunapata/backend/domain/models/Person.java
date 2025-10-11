@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -42,4 +43,7 @@ public class Person {
 
     @OneToOne(mappedBy = "person", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private User user;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private List<Report> complaints;
 }
