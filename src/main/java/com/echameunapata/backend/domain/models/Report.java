@@ -1,7 +1,7 @@
 package com.echameunapata.backend.domain.models;
 
-import com.echameunapata.backend.domain.enums.ReportStatus;
-import com.echameunapata.backend.domain.enums.ReportType;
+import com.echameunapata.backend.domain.enums.reports.ReportStatus;
+import com.echameunapata.backend.domain.enums.reports.ReportType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

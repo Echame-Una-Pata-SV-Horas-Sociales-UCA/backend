@@ -1,7 +1,7 @@
 package com.echameunapata.backend.domain.models;
 
-import com.echameunapata.backend.domain.enums.AnimalSex;
-import com.echameunapata.backend.domain.enums.AnimalSpecies;
+import com.echameunapata.backend.domain.enums.animals.AnimalSex;
+import com.echameunapata.backend.domain.enums.animals.AnimalSpecies;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -54,4 +54,6 @@ public class Animal {
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<AnimalPhoto>photos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
+    private List<AdoptionApplication> adoptionApplications;
 }

@@ -1,4 +1,4 @@
-package com.echameunapata.backend.domain.enums;
+package com.echameunapata.backend.domain.enums.reports;
 
 public enum ReportStatus {
     PENDING,
