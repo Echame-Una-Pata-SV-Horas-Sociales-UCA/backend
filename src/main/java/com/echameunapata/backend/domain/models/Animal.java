@@ -59,4 +59,7 @@ public class Animal {
 
     @OneToOne(mappedBy = "animal", fetch = FetchType.LAZY)
     private Adoption adoption;
+
+    @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
+    private List<HealthEvent>healthEvents;
 }
