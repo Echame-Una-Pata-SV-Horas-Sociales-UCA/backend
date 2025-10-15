@@ -7,6 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,5 +36,10 @@ public class Adoption {
     @OneToOne(optional = false)
     @JoinColumn(name = "adoption_application_id", nullable = false, unique = true)
     private AdoptionApplication adoptionApplication;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<AdoptionMonitoring>adoptionMonitoring;
+
+
 
 }
