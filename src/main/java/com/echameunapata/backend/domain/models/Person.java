@@ -49,4 +49,7 @@ public class Person {
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
     private List<AdoptionApplication> adoptionApplications;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private List<Adoption> adoptions;
 }

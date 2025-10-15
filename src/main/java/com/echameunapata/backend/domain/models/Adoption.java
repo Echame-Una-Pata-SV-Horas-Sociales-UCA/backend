@@ -24,4 +24,16 @@ public class Adoption {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
+    @OneToOne(optional = false)
+    @JoinColumn(name = "animal_id", nullable = false)
+    private Animal animal;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "person_id", nullable = false)
+    private Person adopter;
+
+    @OneToOne(optional = false)
+    @JoinColumn(name = "adoption_application_id", nullable = false, unique = true)
+    private AdoptionApplication adoptionApplication;
+
 }

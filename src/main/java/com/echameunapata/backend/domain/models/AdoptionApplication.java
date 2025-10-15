@@ -47,4 +47,7 @@ public class AdoptionApplication {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "animal_id", nullable = false)
     private Animal animal;
+
+    @OneToOne(mappedBy = "adoptionApplication", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Adoption adoption;
 }
