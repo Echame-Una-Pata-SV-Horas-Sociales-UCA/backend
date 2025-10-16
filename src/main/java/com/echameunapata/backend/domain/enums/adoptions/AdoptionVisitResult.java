@@ -11,8 +11,8 @@ public enum AdoptionVisitResult {
                 return result;
             }
         }
-        //TODO:agregar mensaje
-        throw  new IllegalArgumentException("");
+
+        throw  new IllegalArgumentException("No enum constant with text " + resultString);
     }
 
 

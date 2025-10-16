@@ -61,8 +61,11 @@ public class Animal {
     private Adoption adoption;
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
-    private List<HealthEvent>healthEvents;
+    private List<HealthEvent>healthEvents= new ArrayList<>();
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
-    private List<Sponsorship>sponsorships;
+    private List<Sponsorship>sponsorships= new ArrayList<>();
+
+    @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TemporaryHome>temporaryHomes = new ArrayList<>();
 }

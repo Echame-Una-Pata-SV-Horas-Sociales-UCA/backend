@@ -17,7 +17,6 @@ public enum HealthEventType {
             }
         }
 
-        //TODO: falta mensaje
-        throw new IllegalArgumentException("");
+        throw new IllegalArgumentException("No enum constant with text " + eventstring);
     }
 }

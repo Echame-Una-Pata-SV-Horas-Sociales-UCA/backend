@@ -55,4 +55,7 @@ public class Person {
 
     @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)
     private List<Sponsorship>sponsorships;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private List<TemporaryHome> temporaryHomes;
 }
