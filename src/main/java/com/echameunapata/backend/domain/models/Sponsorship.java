@@ -1,6 +1,6 @@
 package com.echameunapata.backend.domain.models;
 
-import com.echameunapata.backend.domain.enums.health.HealthEventType;
+import com.echameunapata.backend.domain.enums.sponsorship.SponsorshipStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -12,38 +12,38 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity
 @Data
-@Table(name = "health_events")
-public class HealthEvent {
+@Entity
+@Table(name = "sponsorships")
+public class Sponsorship {
 
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     private UUID id;
 
-    @NotNull(message = "Event type cannot be null")
+    @Column(precision = 10, scale = 2, nullable = false)
+    private BigDecimal monthly_amount;
+
     @Enumerated(EnumType.STRING)
-    private HealthEventType typeEvent;
+    @NotNull(message = "Sponsorship status cannot be null")
+    private SponsorshipStatus sponsorship_status;
 
+    private Date start_date;
+
+    private Date end_date;
     @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(columnDefinition = "TEXT")
-    private String medicament;
-
-    private String dose;
-
-    @Column(precision = 5, scale = 2)
-    private BigDecimal weight_kg;
-    private Date next_date;
-    private String responsible;
+    private String notes;
 
     @CreationTimestamp
     private Timestamp createAt;
     @UpdateTimestamp
     private Timestamp updateAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "sponsor_id", nullable = false)
+    private Person sponsor;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "animal_id", nullable = false)
     private Animal animal;
 }

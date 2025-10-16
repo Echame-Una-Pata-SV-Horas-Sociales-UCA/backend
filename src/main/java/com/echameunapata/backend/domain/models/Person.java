@@ -52,4 +52,7 @@ public class Person {
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
     private List<Adoption> adoptions;
+
+    @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)
+    private List<Sponsorship>sponsorships;
 }
