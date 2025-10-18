@@ -5,19 +5,24 @@ import com.echameunapata.backend.domain.models.User;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.UserRepository;
 import com.echameunapata.backend.services.contract.IAuthService;
+import com.echameunapata.backend.services.contract.IRoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final IRoleService roleService;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, IRoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     @Override
@@ -33,6 +38,7 @@ public class AuthServiceImpl implements IAuthService {
             user.setName(userDto.getName());
             user.setEmail(userDto.getEmail());
             user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            user.setRoles(Set.of(roleService.findById("USER")));
 
             return userRepository.save(user);
         }catch (Exception e){
