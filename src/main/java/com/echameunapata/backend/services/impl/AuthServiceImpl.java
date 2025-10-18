@@ -1,5 +1,6 @@
 package com.echameunapata.backend.services.impl;
 
+import com.echameunapata.backend.domain.dtos.auth.LoginDto;
 import com.echameunapata.backend.domain.dtos.auth.RegisterUserDto;
 import com.echameunapata.backend.domain.models.Token;
 import com.echameunapata.backend.domain.models.User;
@@ -58,6 +59,29 @@ public class AuthServiceImpl implements IAuthService {
             user.setRoles(Set.of(roleService.findById("USER")));
 
             return userRepository.save(user);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    /**
+     * Este método permite a un usuario iniciar sesión.
+     *
+     * @param userDto Contiene las credenciales de inicio de sesion del usuario (email, password)
+     * @return El token de acceso del usuario.
+     * @throws HttpError Si las credenciales son inválidas.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Token loginUser(LoginDto userDto) {
+        try{
+            var user = userRepository.findByEmail(userDto.getEmail());
+
+            if(user == null || !passwordEncoder.matches(userDto.getPassword(), user.getPassword())){
+                throw new HttpError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+            }
+
+            return registerToken(user);
         }catch (Exception e){
             throw e;
         }
