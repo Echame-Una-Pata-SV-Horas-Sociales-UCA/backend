@@ -16,6 +16,13 @@ public class RoleServiceImpl implements IRoleService {
         this.roleRepository = roleRepository;
     }
 
+    /**
+     * Este método busca un rol por su ID.
+     *
+     * @param id El ID del rol a buscar.
+     * @return El rol encontrado.
+     * @throws HttpError Si el rol no existe.
+     */
     @Override
     public Role findById(String id) {
         try{

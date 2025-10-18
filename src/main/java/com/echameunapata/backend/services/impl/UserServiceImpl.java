@@ -16,6 +16,13 @@ public class UserServiceImpl implements IUserService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Este método busca un usuario por su correo electrónico.
+     *
+     * @param email El correo electrónico del usuario.
+     * @return El usuario encontrado.
+     * @throws HttpError Si el usuario no existe.
+     */
     @Override
     public User findUserByEmail(String email) {
         try{
