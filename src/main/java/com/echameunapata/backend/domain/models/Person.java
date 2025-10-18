@@ -22,12 +22,8 @@ public class Person {
     @Id
     private UUID id;
     @NotEmpty(message = "First names cannot be empty")
-    @Min(value = 3, message = "First names must be at least 3 characters long")
-    @Max(value = 50, message = "First names cannot be longer than 50 characters")
     private String firstNames;
     @NotEmpty(message = "Last names cannot be empty")
-    @Min(value = 3, message = "Last names must be at least 3 characters long")
-    @Max(value = 50, message = "Last names cannot be longer than 50 characters")
     private String lastNames;
     private String phoneNumber;
     @NotEmpty(message = "DUI cannot be empty")
@@ -50,7 +46,7 @@ public class Person {
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
     private List<AdoptionApplication> adoptionApplications;
 
-    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "adopter", fetch = FetchType.LAZY)
     private List<Adoption> adoptions;
 
     @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)

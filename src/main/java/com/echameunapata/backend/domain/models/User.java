@@ -17,8 +17,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
 @Data
+@Table(name = "users")
 public class User {
 
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,8 +26,6 @@ public class User {
     private UUID id;
 
     @NotEmpty(message = "Name cannot be empty")
-    @Min(value = 3, message = "Name must be at least 3 characters long")
-    @Max(value = 50, message = "Name cannot be longer than 50 characters")
     private String name;
 
     @NotEmpty
@@ -51,10 +49,9 @@ public class User {
     private Set<Role>roles = new HashSet<>();
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "person_id", referencedColumnName = "id")
+    @JoinColumn(name = "person_id")
     private Person person;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore
     private List<Token>tokens;
 }
