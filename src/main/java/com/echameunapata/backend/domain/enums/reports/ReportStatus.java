@@ -4,7 +4,8 @@ public enum ReportStatus {
     PENDING,
     IN_PROGRESS,
     RESOLVED,
-    REJECTED;
+    REJECTED,
+    DISCARDED;
 
     public static ReportStatus fromString(String statusString){
         for(ReportStatus status: ReportStatus.values()){

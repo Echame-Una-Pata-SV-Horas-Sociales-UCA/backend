@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -52,6 +53,9 @@ public class AdoptionApplication {
     @OneToOne(mappedBy = "adoptionApplication", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Adoption adoption;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoptionApplication")
     private List<AdoptionVisit> adoptionVisits;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoptionApplication")
+    private Set<AdoptionReference> adoptionReferences;
 }

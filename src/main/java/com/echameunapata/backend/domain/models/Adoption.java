@@ -37,7 +37,7 @@ public class Adoption {
     @JoinColumn(name = "adoption_application_id", nullable = false, unique = true)
     private AdoptionApplication adoptionApplication;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoption")
     private List<AdoptionMonitoring>adoptionMonitoring;
 
 
