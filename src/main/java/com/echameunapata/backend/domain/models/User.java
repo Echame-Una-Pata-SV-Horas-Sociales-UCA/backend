@@ -10,10 +10,12 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -23,14 +25,8 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     private UUID id;
-
-    @NotEmpty(message = "Name cannot be empty")
     private String name;
-
-    @NotEmpty
-    @Email(message = "Email should be valid")
     private String email;
-    @NotEmpty(message = "Password cannot be empty")
     private String password;
 
     private Boolean IsActive = true;
@@ -39,7 +35,7 @@ public class User implements UserDetails {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -52,11 +48,13 @@ public class User implements UserDetails {
     private Person person;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Token>tokens;
+    private List<Token>tokens = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities = roles.stream().map(role -> new SimpleGrantedAuthority(role.getId())).collect(Collectors.toList());
+        return authorities;
     }
 
     @Override

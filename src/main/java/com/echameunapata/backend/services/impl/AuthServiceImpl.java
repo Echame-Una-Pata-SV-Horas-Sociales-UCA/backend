@@ -2,6 +2,7 @@ package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.dtos.auth.LoginDto;
 import com.echameunapata.backend.domain.dtos.auth.RegisterUserDto;
+import com.echameunapata.backend.domain.models.Role;
 import com.echameunapata.backend.domain.models.Token;
 import com.echameunapata.backend.domain.models.User;
 import com.echameunapata.backend.exceptions.HttpError;
@@ -10,12 +11,13 @@ import com.echameunapata.backend.repositories.UserRepository;
 import com.echameunapata.backend.services.contract.IAuthService;
 import com.echameunapata.backend.services.contract.IRoleService;
 import com.echameunapata.backend.utils.token.JwtTools;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,27 +44,29 @@ public class AuthServiceImpl implements IAuthService {
      * @param userDto El DTO del usuario a registrar.
      * @throws HttpError Si el usuario ya existe.
      */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public User registerUser(RegisterUserDto userDto) {
-        try {
-            var user = userRepository.findByEmail(userDto.getEmail());
+        @Override
+        @Transactional(rollbackOn = Exception.class)
+        public User registerUser(RegisterUserDto userDto) {
+            try {
+                var user = userRepository.findByEmail(userDto.getEmail());
 
-            if(user != null){
-                throw new HttpError(HttpStatus.CONFLICT, "Email already in use");
+                if(user != null){
+                    throw new HttpError(HttpStatus.CONFLICT, "Email already in use");
+                }
+
+                user = new User();
+                user.setName(userDto.getName());
+                user.setEmail(userDto.getEmail());
+                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+                Role role = roleService.findById("USER");
+
+                user.setRoles(new HashSet<>(Set.of(role)));
+
+                return userRepository.save(user);
+            }catch (Exception e){
+                throw e;
             }
-
-            user = new User();
-            user.setName(userDto.getName());
-            user.setEmail(userDto.getEmail());
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            user.setRoles(Set.of(roleService.findById("USER")));
-
-            return userRepository.save(user);
-        }catch (Exception e){
-            throw e;
         }
-    }
 
     /**
      * Este método permite a un usuario iniciar sesión.
@@ -72,7 +76,7 @@ public class AuthServiceImpl implements IAuthService {
      * @throws HttpError Si las credenciales son inválidas.
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackOn = Exception.class)
     public Token loginUser(LoginDto userDto) {
         try{
             var user = userRepository.findByEmail(userDto.getEmail());
@@ -95,7 +99,7 @@ public class AuthServiceImpl implements IAuthService {
      * @throws HttpError Si el token no es válido.
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackOn = Exception.class)
     public Token registerToken(User user) {
         try {
             String tokenString = jwtTools.generateToken(user);
@@ -118,7 +122,7 @@ public class AuthServiceImpl implements IAuthService {
      * @throws HttpError Si el token no es válido.
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackOn = Exception.class)
     public Boolean isTokenValid(User user, String token) {
         try {
             cleanToken(user);
@@ -139,7 +143,7 @@ public class AuthServiceImpl implements IAuthService {
      * @param user El usuario del que se limpian los tokens.
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackOn = Exception.class)
     public void cleanToken(User user) {
         List<Token>token = tokenRepository.findByUserAndCanActive(user, true);
         token.forEach(t -> {

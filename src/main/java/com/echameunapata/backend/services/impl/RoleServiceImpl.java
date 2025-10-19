@@ -26,6 +26,7 @@ public class RoleServiceImpl implements IRoleService {
     @Override
     public Role findById(String id) {
         try{
+            System.out.println("Role found: " + id);
             var role = roleRepository.findById(id).orElse(null);
             if (role == null)
             {

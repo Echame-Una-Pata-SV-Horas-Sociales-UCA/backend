@@ -1,5 +1,6 @@
 package com.echameunapata.backend.domain.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -26,7 +27,8 @@ public class Role {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    private Set<User> users = new HashSet<>();
+//    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+//    @JsonIgnore
+//    private Set<User> users;
 
 }

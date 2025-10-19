@@ -5,6 +5,7 @@ import com.echameunapata.backend.services.contract.IUserService;
 import com.echameunapata.backend.utils.security.AuthFiltersTools;
 import com.echameunapata.backend.utils.token.JwtTools;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,10 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 @EnableWebSecurity
 public class WebSecurityConfiguration {
+
+    @Value("${api.base-path}")
+    private String apiBasePath;
+
 
     private final PasswordEncoder passwordEncoder;
     private final IUserService userService;
@@ -67,7 +72,7 @@ public class WebSecurityConfiguration {
         httpSecurity.httpBasic(withDefaults()).csrf(csrf-> csrf.disable());
 
         httpSecurity.authorizeHttpRequests(auth->
-                auth.requestMatchers("/api/auth/**").permitAll()
+                auth.requestMatchers(apiBasePath+"/auth/**").permitAll()
                         .anyRequest().authenticated()
         );
         httpSecurity.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
