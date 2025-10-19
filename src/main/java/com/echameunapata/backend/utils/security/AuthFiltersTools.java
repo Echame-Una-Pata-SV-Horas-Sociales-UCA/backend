@@ -31,6 +31,15 @@ public class AuthFiltersTools extends OncePerRequestFilter {
         this.userService = userService;
     }
 
+    /**
+     * Este método filtra las solicitudes HTTP para autenticar a los usuarios mediante JWT.
+     *
+     * @param request  La solicitud HTTP entrante.
+     * @param response La respuesta HTTP saliente.
+     * @param filterChain La cadena de filtros.
+     * @throws ServletException Si ocurre un error en el servlet.
+     * @throws IOException Si ocurre un error de E/S.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String tokenHeader  = request.getHeader("Authorization");

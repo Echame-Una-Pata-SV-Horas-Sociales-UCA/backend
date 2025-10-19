@@ -20,6 +20,11 @@ public class JwtTools {
     @Value("${jwt.expiration-time}")
     private Long expiration;
 
+    /** Genera un token JWT para un usuario dado
+     *
+     * @param user Usuario para el cual se genera el token
+     * @return Token JWT
+     */
     public String generateToken(User user){
         Map<String, Object>claims = new HashMap<>();
         claims.put("id", user.getId().toString());
@@ -33,6 +38,11 @@ public class JwtTools {
                 .compact();
     }
 
+    /** Verifica la validez de un token JWT
+     *
+     * @param token Token JWT a verificar
+     * @return true si el token es válido, false en caso contrario
+     */
     public boolean verifyTokens(String token){
         try{
             JwtParser parser = Jwts.parser()
@@ -47,6 +57,11 @@ public class JwtTools {
         }
     }
 
+    /** Extrae el correo electrónico del usuario desde un token JWT
+     *
+     * @param token Token JWT
+     * @return Correo electrónico del usuario o null si el token no es válido
+     */
     public String getEmailFromToken(String token){
         try{
             JwtParser parser = Jwts.parser()

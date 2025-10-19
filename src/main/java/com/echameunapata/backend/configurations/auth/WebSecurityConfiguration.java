@@ -35,6 +35,12 @@ public class WebSecurityConfiguration {
         this.authFiltersTools = authFiltersTools;
     }
 
+    /** Configuración del AuthenticationManager
+     *
+     * @param httpSecurity
+     * @return
+     * @throws Exception
+     */
     @Bean
     AuthenticationManager authenticationManager(HttpSecurity httpSecurity)throws Exception{
         AuthenticationManagerBuilder authenticationManagerBuilder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
@@ -50,6 +56,12 @@ public class WebSecurityConfiguration {
         return authenticationManagerBuilder.build();
     }
 
+    /** Configuración de seguridad HTTP
+     *
+     * @param httpSecurity
+     * @return
+     * @throws Exception
+     */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity.httpBasic(withDefaults()).csrf(csrf-> csrf.disable());

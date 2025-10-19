@@ -118,6 +118,7 @@ public class AuthServiceImpl implements IAuthService {
      * @throws HttpError Si el token no es válido.
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean isTokenValid(User user, String token) {
         try {
             cleanToken(user);
