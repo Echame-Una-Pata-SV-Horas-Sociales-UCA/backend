@@ -11,6 +11,11 @@ import java.util.Map;
 @Component
 public class ErrorTools {
 
+    /** Mapea una lista de errores de validación a un mapa donde la clave es el campo y el valor es una lista de mensajes de error
+     *
+     * @param errors Lista de errores de validación
+     * @return Mapa de errores
+     */
     public Map<String, List<String>> mapErrors(List<FieldError>errors){
         Map<String, List<String>> errorMap = new HashMap<>();
 
