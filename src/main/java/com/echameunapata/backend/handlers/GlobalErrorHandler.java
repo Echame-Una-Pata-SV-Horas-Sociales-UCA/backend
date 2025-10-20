@@ -11,17 +11,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.ConcurrentModificationException;
+
 @ControllerAdvice
 public class GlobalErrorHandler {
     private final ErrorTools errorTools;
 
     public GlobalErrorHandler(ErrorTools errorTools) {
         this.errorTools = errorTools;
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<GeneralResponse> GeneralHandler(Exception ex) {
-        return GeneralResponse.getResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -62,5 +59,15 @@ public class GlobalErrorHandler {
     @ExceptionHandler(HttpError.class)
     public ResponseEntity<GeneralResponse> httpErrorHandler(HttpError ex) {
         return GeneralResponse.getResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    @ExceptionHandler(ConcurrentModificationException.class)
+    public ResponseEntity<GeneralResponse> concurrentModificationExceptionHandler(ConcurrentModificationException ex) {
+        return GeneralResponse.getResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<GeneralResponse> GeneralHandler(Exception ex) {
+        return GeneralResponse.getResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

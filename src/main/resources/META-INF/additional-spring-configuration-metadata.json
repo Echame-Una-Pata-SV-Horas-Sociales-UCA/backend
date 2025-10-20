@@ -9,5 +9,10 @@
       "name": "jwt.expiration-time",
       "type": "java.lang.String",
       "description": "This value defines the expiration time assigned to tokens. After this period has elapsed since their generation, the tokens will no longer be valid in the system."
+    },
+    {
+      "name": "api.base-path",
+      "type": "java.lang.String",
+      "description": "This property sets the base path for all API endpoints in the application."
     }
   ] }
