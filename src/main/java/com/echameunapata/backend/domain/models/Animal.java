@@ -2,6 +2,7 @@ package com.echameunapata.backend.domain.models;
 
 import com.echameunapata.backend.domain.enums.animals.AnimalSex;
 import com.echameunapata.backend.domain.enums.animals.AnimalSpecies;
+import com.echameunapata.backend.domain.enums.animals.AnimalState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -23,27 +24,25 @@ public class Animal {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     private UUID id;
-    @NotEmpty(message = "Name cannot be empty")
     private String name;
 
-    @NotNull(message = "Species cannot be empty")
     @Enumerated(EnumType.STRING)
     private AnimalSpecies species;
 
-    @NotNull(message = "Sex cannot be null")
     @Enumerated(EnumType.STRING)
     private AnimalSex sex;
     private String race;
     private LocalDate birthDate;
 
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private AnimalState state = AnimalState.UNDER_TREATMENT;
     private LocalDate rescueDate;
     private String rescueLocation;
 
     @Column(columnDefinition = "TEXT")
     private String initialDescription;
     private Boolean sterilized;
-    private Boolean missingLimb;
+    private Boolean missingLimb = false;
     @Column(columnDefinition = "TEXT")
     private String observations;
     @CreationTimestamp
