@@ -1,11 +1,25 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# =========================
+# Proyecto: Spring Boot + Gradle (IntelliJ)
+# =========================
 
-### STS ###
+# --- Gradle ---
+.gradle/
+build/
+# Mantener wrapper (recomendado versionarlo)
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+# Scripts wrapper
+!gradlew
+!gradlew.bat
+
+# --- IntelliJ IDEA / JetBrains ---
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# --- Otras IDEs (opcionales, por si alguien abre el repo con ellas) ---
+# STS / Eclipse
 .apt_generated
 .classpath
 .factorypath
@@ -14,27 +28,92 @@ build/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### VS Code ###
+# VS Code
 .vscode/
 
-### Mac ###
+# --- Sistema Operativo ---
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+# Linux/NFS
+.nfs*
+.Trash-*
+
+# --- Spring Boot / App runtime ---
+logs/
+*.log
+*.pid
+*.hprof
+tmp/
+temp/
+
+# --- Archivos de configuración y secretos (NO versionar) ---
+# Variables de entorno
+.env
+.env.*
+.envrc
+*.env
+*.env.local
+*.env.development
+*.env.production
+# Claves y certificados
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+*.crt
+*.der
+# Propiedades sensibles (mantén un application-example)
+application-*.properties
+application-*.yml
+# Si decides mantener application.properties/yml en repo,
+# usa placeholders y evita credenciales reales.
+
+# --- Datos, dumps y respaldos ---
+*.sql
+*.dump
+*.bak
+backups/
+backup/
+database/backup/
+
+# --- Subidas locales y artefactos de almacenamiento ---
+uploads/
+storage/
+files/
+# (Alineado con FILE_UPLOAD_DIR definido en tu entorno)
+
+# --- Cobertura y reportes de pruebas ---
+coverage/
+jacoco.exec
+.buildscan/
+build/reports/
+test-results/
+surefire-reports/
+*.lcov
+
+# --- Docker / Contenedores (opcionales) ---
+# Ignora overrides locales
+docker-compose.override.yml
+# Archivos temporales de Docker
+*.tar
+
+# --- Herramientas varias ---
+# HTTP client de IntelliJ
+.idea/httpRequests/
+# Sonar / análisis
+.sonar/
+.out/
