@@ -47,6 +47,15 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    /**
+     * Este método busca una lista de usuarios a partir de los filtros que se le envian
+     *
+     * @param idsRoles lista de ids para filtrar.
+     * @param isActive valor booleano para verificar si el usuario esta activo.
+     * @param pageable valores para generar la paginacion.
+     * @return Lista de usuarios encontrados.
+     * @throws HttpError Si no hay usuarios con esas caracteristicas.
+     */
     @Override
     public Page<User> findAllUsersByRoleAndIsActive(List<String>idsRoles, Boolean isActive, Pageable pageable) {
         try{
@@ -60,6 +69,13 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    /**
+     * Este método busca un usuario a partir de su id
+     *
+     * @param id id del usuario a buscar.
+     * @return El usuarios encontrados.
+     * @throws HttpError Si no existe un usuraio con ese id.
+     */
     @Override
     public User findUserById(UUID id) {
         try{
@@ -73,6 +89,14 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    /**
+     * Este método permite a un usuario actualizar su informacion
+     *
+     * @param userId id del usuario a actualizar.
+     * @param userInfoDto informacion nueva a insertar.
+     * @return El usuarios con los datos actualizados.
+     * @throws HttpError Si no existe un usurio con ese id.
+     */
     @Override
     public User updateUserInfo(UUID userId, UpdateUserInfoDto userInfoDto) {
         try{
@@ -89,6 +113,12 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    /**
+     * Este metodo pormite cambiar el estado del usuario dentro de la aplicacion
+     *
+     * @param id id del usuario a actualizar.
+     * @throws HttpError Si no existe un usuraio con ese id.
+     */
     @Override
     public void updateIsActive(UUID id) {
         try{
@@ -104,6 +134,14 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    /**
+     * Este metodo pormite actualizar los roles de un usuario
+     *
+     * @param id id del usuario a actualizar.
+     * @param rolesIds ids de los roles a insertar.
+     * @param action accion a realizar (remover o agregar roles).
+     * @throws HttpError Si no existe un usuraio con ese id.
+     */
     @Override
     public void updateRolesInUser(UUID id, List<String> rolesIds, String action) {
         var user = userRepository.findById(id).orElse(null);
@@ -125,7 +163,13 @@ public class UserServiceImpl implements IUserService {
         return user;
     }
 
-
+    /**
+     * Este metodo pormite actualizar los roles de un usuario
+     *
+     * @param ids ids de los usuarios a buscar.
+     * @return La lista de usuarios encontrados.
+     * @throws HttpError Si no hay usuarios con esos roles.
+     */
     @Override
     public List<User> findAllUsersByIds(List<UUID> ids) {
         try{
