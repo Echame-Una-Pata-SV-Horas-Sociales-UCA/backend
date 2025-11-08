@@ -37,8 +37,9 @@ public class PersonServiceImpl  implements IPersonService {
         try{
             var person = personRepository.findByEmail(personDto.getEmail());
             if (person !=null){
-                return null;
+                return person;
             }
+
             person = modelMapper.map(person, Person.class);
             return personRepository.save(person);
         }catch (Exception e){
