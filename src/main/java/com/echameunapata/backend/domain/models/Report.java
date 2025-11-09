@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public class Report {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Complaint status cannot be null")
     private ReportStatus status;
-    private Timestamp receptionDate;
+    private Instant receptionDate;
 
     @CreationTimestamp
     private Timestamp createdAt;
@@ -51,5 +52,11 @@ public class Report {
 
     @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
     private List<ReportEvidence>reportEvidences;
+
+    @PrePersist
+    public void prePersist(){
+        this.status = ReportStatus.PENDING;
+        this.receptionDate = Instant.now();
+    }
 
 }

@@ -8,13 +8,14 @@ import com.echameunapata.backend.domain.models.Animal;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.AnimalRepository;
 import com.echameunapata.backend.services.contract.IAnimalService;
-import org.hibernate.query.Page;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -62,9 +63,9 @@ public class AnimalServiceImpl implements IAnimalService {
     }
 
     @Override
-    public List<Animal> findAllAnimalsState(String stateString, Pageable pageable) {
+    public Page<Animal> findAllAnimalsState(String stateString, Pageable pageable) {
         try{
-            List<Animal> animals = new ArrayList<>();
+            Page<Animal> animals;
 
             if (stateString.isEmpty()){
                animals = animalRepository.findAll(pageable);
