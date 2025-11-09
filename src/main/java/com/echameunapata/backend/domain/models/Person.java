@@ -21,13 +21,10 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     private UUID id;
-    @NotEmpty(message = "First names cannot be empty")
     private String firstNames;
-    @NotEmpty(message = "Last names cannot be empty")
     private String lastNames;
+    private String email;
     private String phoneNumber;
-    @NotEmpty(message = "DUI cannot be empty")
-    @Pattern(regexp = "\\d{8}-\\d", message = "DUI must be in the format ########-#")
     private String dui;
     private String address;
     private String city;
