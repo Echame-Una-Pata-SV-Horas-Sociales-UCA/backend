@@ -28,7 +28,21 @@ build/
 .springBeans
 .sts4-cache
 bin/
-# NetBeans
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+test
+
+### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
