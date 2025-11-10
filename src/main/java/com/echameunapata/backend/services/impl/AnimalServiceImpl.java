@@ -68,11 +68,11 @@ public class AnimalServiceImpl implements IAnimalService {
             Page<Animal> animals;
 
             if (stateString.isEmpty()){
-               animals = animalRepository.findAll(pageable);
+               animals = animalRepository.findAll((Sort) pageable);
             }
             else{
                 AnimalState state = AnimalState.fromString(stateString);
-                animals = animalRepository.findAllByState(state, pageable);
+                animals = animalRepository.findAllByState(state, (org.springframework.data.domain.Pageable) pageable);
             }
 
             return animals;

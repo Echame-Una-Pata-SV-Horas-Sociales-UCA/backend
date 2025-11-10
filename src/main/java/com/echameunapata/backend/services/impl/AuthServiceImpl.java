@@ -9,20 +9,26 @@ import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.TokenRepository;
 import com.echameunapata.backend.repositories.UserRepository;
 import com.echameunapata.backend.services.contract.IAuthService;
+import com.echameunapata.backend.services.contract.IMailService;
 import com.echameunapata.backend.services.contract.IRoleService;
 import com.echameunapata.backend.utils.token.JwtTools;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
+
+    private static final String TOKEN_TYPE_PASSWORD_RESET = "PASSWORD_RESET";
+    private static final Duration RESET_TOKEN_TTL = Duration.ofHours(1);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -30,12 +36,15 @@ public class AuthServiceImpl implements IAuthService {
     private final JwtTools jwtTools;
     private final TokenRepository tokenRepository;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, IRoleService roleService, JwtTools jwtTools, TokenRepository tokenRepository) {
+    private final IMailService mailService;
+
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, IRoleService roleService, JwtTools jwtTools, TokenRepository tokenRepository, IMailService mailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
         this.jwtTools = jwtTools;
         this.tokenRepository = tokenRepository;
+        this.mailService = mailService;
     }
 
     /**
@@ -89,6 +98,85 @@ public class AuthServiceImpl implements IAuthService {
         }catch (Exception e){
             throw e;
         }
+    }
+
+    /**
+     * Este método maneja la solicitud de reseteo de contraseña.
+     * @param email El correo electrónico del usuario que solicita el reseteo.
+     */
+    @Override
+    @Transactional(rollbackOn =  Exception.class)
+    public void forgotPasswordRequest(String email) {
+        // 1. Buscar al usuario por su email
+        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
+
+        // 2. Por seguridad, si el usuario no existe, no hacemos nada y no informamos del error.
+        // Esto evita que atacantes adivinen qué correos están registrados.
+        if (userOptional.isEmpty()) {
+            System.out.println("Intento de reseteo para email no existente: " + email);
+            return;
+        }
+
+        User user = userOptional.get();
+
+        // Invalidamos cualquier token de sesión activo
+        List<Token> activeTokens = tokenRepository.findByUserAndCanActive(user, true);
+        activeTokens.forEach(t -> {
+            t.setCanActive(false);
+            tokenRepository.save(t);
+        });
+
+        // Generamos un token que funcionará para resetear la contraseña únicamente
+        String tokenString = jwtTools.generateToken(user);
+        Token resetToken = new Token(tokenString, user);
+
+        // No necesito que el usuario copie toda la longitud del token porque es muy largo. Con que pueda ingresar 8 valores únicos es suficiente.
+        // Tienen que ser los últimos 8 caracteres porque los iniciales son siempre los mismos (depende del id del usuario).
+        String shortToken = tokenString.substring(tokenString.length() - 8);
+
+        resetToken.setType(TOKEN_TYPE_PASSWORD_RESET);
+
+        resetToken.setToken(shortToken);
+        tokenRepository.save(resetToken);
+
+        // Enviamos el email con el token de reseteo
+        String mailBody = "Hola " + user.getName() + ",\n\n"
+                + "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n"
+                + "Utiliza el siguiente token para restablecer tu contraseña. Este token es válido por 1 hora:\n\n"
+                + resetToken.getToken() + "\n\n"
+                + "Si no has solicitado este cambio, puedes ignorar este correo electrónico.\n\n"
+                + "Saludos,\n"
+                + "El equipo de 'Echame Una Pata El Salvador'";
+
+        mailService.sendEmail(user.getEmail(), "Forgot Password Reset Token", mailBody);
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void resetPassword(String resetToken, String newPassword) {
+        // 1. Buscar el token de reseteo, verificando que sea válido y activo
+        Token token = tokenRepository.findByTokenAndTypeAndCanActive(resetToken, TOKEN_TYPE_PASSWORD_RESET, true)
+                .orElseThrow(() -> new HttpError(HttpStatus.BAD_REQUEST, "Invalid reset token"));
+
+        // 2. Verificar que el token no haya expirado
+        Instant tokenCreationTime = token.getTimestamp().toInstant();
+        if (Instant.now().isAfter(tokenCreationTime.plus(RESET_TOKEN_TTL))) {
+
+            // Si el token ya expiró por tiempo pero su campo de canActive sigue en true, lo desactivamos ahora.
+            token.setCanActive(false);
+            tokenRepository.save(token);
+
+            throw new HttpError(HttpStatus.BAD_REQUEST, "Reset token has expired");
+        }
+
+        // 3. Actualizar la contraseña del usuario
+        User user = token.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // 4. Invalidar el token de reseteo
+        token.setCanActive(false);
+        tokenRepository.save(token);
     }
 
     /**

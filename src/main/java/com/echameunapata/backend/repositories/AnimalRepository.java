@@ -14,6 +14,7 @@ import java.util.UUID;
 @Repository
 public interface AnimalRepository extends JpaRepository<Animal, UUID> {
     Animal findByName(String name);
-    Page<Animal> findAllByState(AnimalState state, Pageable pageable);
+    List<Animal>findAllByState(AnimalState state, Pageable pageable);
+    Page<Animal> findAll(Pageable pageable);
     
 }

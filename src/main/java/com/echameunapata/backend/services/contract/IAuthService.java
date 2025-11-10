@@ -13,4 +13,8 @@ public interface IAuthService {
     Boolean isTokenValid(User user, String token) ;
     void cleanToken(User user);
     User findUserAuthenticated();
+
+    // Password reset flow
+    void resetPassword(String resetToken, String newPassword);
+    public void forgotPasswordRequest(String email);
 }
