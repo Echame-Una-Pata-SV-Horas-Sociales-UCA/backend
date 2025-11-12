@@ -20,6 +20,10 @@ public class AdoptionMonitoring {
     @Column(columnDefinition = "TEXT")
     private String observations;
 
+    /**
+     * Campo legacy (si existía con un solo String). Mantener por compatibilidad,
+     * pero ahora preferimos secureUrl / providerPublicId.
+     */
     private String photo;
 
     @CreationTimestamp
@@ -30,4 +34,22 @@ public class AdoptionMonitoring {
     @ManyToOne(optional = false)
     @JoinColumn(name = "adoption_id", nullable = false)
     private Adoption adoption;
+
+    /* --- Campos nuevos para Cloudinary --- */
+    private String provider;
+
+    @Column(name = "provider_public_id", length = 255)
+    private String providerPublicId;
+
+    @Column(name = "secure_url", columnDefinition = "TEXT")
+    private String secureUrl;
+
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
+    private String thumbnailUrl;
+
+    @Column(name = "content_type", length = 100)
+    private String contentType;
+
+    @Column(name = "size_bytes")
+    private Long sizeBytes;
 }

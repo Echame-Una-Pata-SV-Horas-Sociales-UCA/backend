@@ -26,4 +26,22 @@ public class ReportEvidence {
     @ManyToOne
     @JoinColumn(name = "report_id", nullable = false)
     private Report report;
+
+    /* --- Campos nuevos para Cloudinary --- */
+    private String provider;
+
+    @Column(name = "provider_public_id", length = 255)
+    private String providerPublicId;
+
+    @Column(name = "secure_url", columnDefinition = "TEXT")
+    private String secureUrl;
+
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
+    private String thumbnailUrl;
+
+    @Column(name = "content_type", length = 100)
+    private String contentType;
+
+    @Column(name = "size_bytes")
+    private Long sizeBytes;
 }
