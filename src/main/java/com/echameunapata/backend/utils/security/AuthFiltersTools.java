@@ -10,16 +10,20 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
 @Component
 public class AuthFiltersTools extends OncePerRequestFilter {
+
+    // Logger para reemplazar System.out.println
+    private static final Logger logger = LoggerFactory.getLogger(AuthFiltersTools.class);
 
     private final IAuthService authService;
     private final JwtTools jwtTools;
@@ -31,58 +35,51 @@ public class AuthFiltersTools extends OncePerRequestFilter {
         this.userService = userService;
     }
 
-    /**
-     * Este método filtra las solicitudes HTTP para autenticar a los usuarios mediante JWT.
-     *
-     * @param request  La solicitud HTTP entrante.
-     * @param response La respuesta HTTP saliente.
-     * @param filterChain La cadena de filtros.
-     * @throws ServletException Si ocurre un error en el servlet.
-     * @throws IOException Si ocurre un error de E/S.
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String tokenHeader  = request.getHeader("Authorization");
-        String token=null;
+        String tokenHeader = request.getHeader("Authorization");
+        String token = null;
         String email = null;
 
-        if(tokenHeader != null && tokenHeader.length() > 7 && tokenHeader.startsWith("Bearer: ") ){
+        // CORRECCIÓN: Estándar "Bearer " (con espacio, longitud 7)
+        if (tokenHeader != null && tokenHeader.startsWith("Bearer ")) {
             token = tokenHeader.substring(7);
 
             try {
                 email = jwtTools.getEmailFromToken(token);
-            }catch (IllegalArgumentException e){
-
-                System.out.println("Unable to get JWT token");
-
-            }catch (ExpiredJwtException e) {
-
-                System.out.println("JWT token has expired");
-
-            }catch (MalformedJwtException e){
-
-                System.out.println("JWT token is malformed");
+            } catch (IllegalArgumentException e) {
+                logger.warn("Unable to get JWT token");
+            } catch (ExpiredJwtException e) {
+                logger.warn("JWT token has expired");
+            } catch (MalformedJwtException e) {
+                logger.warn("JWT token is malformed");
+            } catch (Exception e) {
+                logger.error("JWT validation error: {}", e.getMessage());
             }
-        }else {
-            System.out.println("Bearer string not foud");
+        } else {
+            // No es un error crítico, puede ser una ruta pública
+            logger.debug("Bearer string not found or header is missing");
         }
-        if (token != null && email != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            User user = userService.findUserByEmail(email);
-            if (user != null){
-                Boolean tokenValidity = authService.isTokenValid(user, token);
-                if(tokenValidity){
-                    UsernamePasswordAuthenticationToken authToken =  new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+        if (token != null && email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = userService.findUserByEmail(email);
+
+            if (user != null) {
+                Boolean tokenValidity = authService.isTokenValid(user, token);
+
+                if (tokenValidity) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            user, null, user.getAuthorities());
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-            }else{
-                System.out.println("User not found");
+            } else {
+                logger.warn("User not found for token email: {}", email);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }
