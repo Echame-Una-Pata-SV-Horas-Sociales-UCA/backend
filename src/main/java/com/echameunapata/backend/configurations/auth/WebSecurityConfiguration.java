@@ -3,21 +3,28 @@ package com.echameunapata.backend.configurations.auth;
 import com.echameunapata.backend.domain.models.User;
 import com.echameunapata.backend.services.contract.IUserService;
 import com.echameunapata.backend.utils.security.AuthFiltersTools;
-import com.echameunapata.backend.utils.token.JwtTools;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -29,7 +36,6 @@ public class WebSecurityConfiguration {
     @Value("${api.base-path}")
     private String apiBasePath;
 
-
     private final PasswordEncoder passwordEncoder;
     private final IUserService userService;
     private final AuthFiltersTools authFiltersTools;
@@ -40,51 +46,70 @@ public class WebSecurityConfiguration {
         this.authFiltersTools = authFiltersTools;
     }
 
-    /** Configuración del AuthenticationManager
-     *
-     * @param httpSecurity
-     * @return
-     * @throws Exception
-     */
     @Bean
-    AuthenticationManager authenticationManager(HttpSecurity httpSecurity)throws Exception{
+    AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
 
-        authenticationManagerBuilder.userDetailsService(email ->{
-                    User user = userService.findUserByEmail(email);
-                    if(user ==null){
-                        throw new UsernameNotFoundException("User not found whit identifier");
-                    }
-                    return user;
-                })
-                .passwordEncoder(passwordEncoder);
+        authenticationManagerBuilder.userDetailsService(email -> {
+            User user = userService.findUserByEmail(email);
+            if (user == null) {
+                throw new UsernameNotFoundException("User not found with identifier: " + email);
+            }
+            return user;
+        }).passwordEncoder(passwordEncoder);
+
         return authenticationManagerBuilder.build();
     }
 
-    /** Configuración de seguridad HTTP
-     *
-     * @param httpSecurity
-     * @return
-     * @throws Exception
-     */
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
-        httpSecurity.httpBasic(withDefaults()).csrf(csrf-> csrf.disable());
+    SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        // Habilitar CORS y deshabilitar CSRF (API Stateless)
+        httpSecurity.cors(withDefaults()).csrf(AbstractHttpConfigurer::disable);
 
-        httpSecurity.authorizeHttpRequests(auth->
-                auth.requestMatchers(apiBasePath+"/auth/**").permitAll()
-                        .anyRequest().authenticated()
+        httpSecurity.authorizeHttpRequests(auth -> {
+            // 1. Endpoints de Autenticación
+            auth.requestMatchers(apiBasePath + "/auth/**").permitAll();
+
+            // 2. Endpoints Públicos (Según SRS y diseño)
+            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/public/**").permitAll();
+            // Catálogo público de animales
+            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/animals/**").permitAll();
+            // Formulario público de adopción
+            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/adoptions").permitAll();
+            // Formulario público de denuncias
+            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/reports").permitAll();
+
+            // 3. Resto de endpoints requieren autenticación
+            auth.anyRequest().authenticated();
+        });
+
+        httpSecurity.sessionManagement(management ->
+                management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        httpSecurity.exceptionHandling(handling ->
+                handling.authenticationEntryPoint((req, res, ex) -> {
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed: " + ex.getMessage());
+                })
         );
-        httpSecurity.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        httpSecurity.exceptionHandling(handling -> handling.authenticationEntryPoint((req, res, ex)->{
-            res.sendError(
-                    HttpServletResponse.SC_UNAUTHORIZED,
-                    "Authentication failed: "+ ex.getMessage()
-            );
-        }));
 
         httpSecurity.addFilterBefore(authFiltersTools, UsernamePasswordAuthenticationFilter.class);
-        return  httpSecurity.build();
+        return httpSecurity.build();
+    }
+
+    /**
+     * Configuración de CORS para permitir peticiones desde el Frontend
+     */
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // En desarrollo se puede usar "*", en producción poner el dominio específico
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
