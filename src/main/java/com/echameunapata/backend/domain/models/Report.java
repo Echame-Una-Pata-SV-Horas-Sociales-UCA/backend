@@ -23,7 +23,6 @@ public class Report {
     @Id
     private UUID id;
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Complaint type cannot be null")
     private ReportType type;
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -33,11 +32,9 @@ public class Report {
 
     private String contactPhone;
 
-    @Email(message = "Email should be valid")
     private String contactEmail;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Complaint status cannot be null")
     private ReportStatus status;
     private Instant receptionDate;
 
@@ -47,7 +44,7 @@ public class Report {
     private Timestamp updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
+    @JoinColumn(name = "user_id")
     private Person person;
 
     @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)

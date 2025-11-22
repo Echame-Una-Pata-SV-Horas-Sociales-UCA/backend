@@ -40,7 +40,7 @@ public class PersonServiceImpl  implements IPersonService {
                 return person;
             }
 
-            person = modelMapper.map(person, Person.class);
+            person = modelMapper.map(personDto, Person.class);
             return personRepository.save(person);
         }catch (Exception e){
             throw e;

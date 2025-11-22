@@ -4,6 +4,7 @@ import com.echameunapata.backend.domain.dtos.reports.CreateReportDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateReportInfoDto;
 import com.echameunapata.backend.domain.enums.reports.ReportStatus;
 import com.echameunapata.backend.domain.enums.reports.ReportType;
+import com.echameunapata.backend.domain.models.Person;
 import com.echameunapata.backend.domain.models.Report;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.ReportRepository;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -38,16 +40,20 @@ public class ReportServiceImpl implements IReportService {
     public Report createReport(CreateReportDto reportDto) {
         try{
             Report report = new Report();
-            report.setType(reportDto.getType());
+            ReportType reportType = ReportType.fromString(reportDto.getType());
+
+            report.setType(reportType);
             report.setDescription(reportDto.getDescription());
             report.setLocation(reportDto.getLocation());
             report.setLocationUrl(reportDto.getLocationUrl());
             report.setIsAnonymous(reportDto.getIsAnonymous());
             report.setContactPhone(reportDto.getContactPhone());
             report.setContactEmail(reportDto.getContactEmail());
+            report.setReportEvidences(new ArrayList<>());
 
             if(!reportDto.getIsAnonymous()){
-                personService.createPerson(reportDto.getPerson());
+                Person person =personService.createPerson(reportDto.getPerson());
+                report.setPerson(person);
             }
 
             return reportRepository.save(report);

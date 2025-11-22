@@ -17,7 +17,7 @@ public class CreateReportDto {
 
 
     @NotNull(message = "Complaint type cannot be null")
-    private ReportType type;
+    private String type;
     @Column(columnDefinition = "TEXT")
     private String description;
     private String location;
