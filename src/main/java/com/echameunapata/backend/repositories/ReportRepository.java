@@ -16,12 +16,12 @@ import java.util.UUID;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, UUID> {
     @Query("""
-        SELECT r FROM Report r
-        WHERE (:type IS NULL OR r.type = :type)
-            AND (:status IS NULL OR r.status = :status)
-            AND (:startDate IS NULL OR r.receptionDate >= :startDate)
-            AND (:endDate IS NULL OR r.receptionDate <= :endDate)
-    """)
+    SELECT r FROM Report r
+    WHERE (:type IS NULL OR r.type = :type)
+      AND (:status IS NULL OR r.status = :status)
+      AND (COALESCE(:startDate, r.receptionDate) <= r.receptionDate)
+      AND (COALESCE(:endDate, r.receptionDate) >= r.receptionDate)
+""")
     Page<Report> findByFilters(
             @Param("type")ReportType type,
             @Param("status")ReportStatus status,
