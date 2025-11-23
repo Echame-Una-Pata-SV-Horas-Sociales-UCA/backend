@@ -2,7 +2,10 @@ package com.echameunapata.backend.domain.dtos.reports;
 
 import com.echameunapata.backend.domain.dtos.person.PersonDto;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -22,8 +25,8 @@ public class FindReportDto {
     private String status;
     private Instant receptionDate;
 
-    private Instant createdAt;
-    private Instant updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     private PersonDto person;
 }
