@@ -2,30 +2,32 @@ package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.dtos.reports.CreateReportDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateReportInfoDto;
+import com.echameunapata.backend.domain.dtos.reports.UpdateStatusReportDto;
 import com.echameunapata.backend.domain.enums.reports.ReportStatus;
 import com.echameunapata.backend.domain.enums.reports.ReportType;
+import com.echameunapata.backend.domain.models.Person;
 import com.echameunapata.backend.domain.models.Report;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.ReportRepository;
 import com.echameunapata.backend.services.contract.IReportService;
+import com.echameunapata.backend.services.notifications.factory.ReportNotificationFactory;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class ReportServiceImpl implements IReportService {
 
     private final ReportRepository reportRepository;
     private final PersonServiceImpl personService;
-
-    public ReportServiceImpl(ReportRepository reportRepository, PersonServiceImpl personService) {
-        this.reportRepository = reportRepository;
-        this.personService = personService;
-    }
+    private final ReportNotificationFactory notificationFactory;
 
     /**
      * Este método permite crear un nuevo reporte
@@ -38,19 +40,27 @@ public class ReportServiceImpl implements IReportService {
     public Report createReport(CreateReportDto reportDto) {
         try{
             Report report = new Report();
-            report.setType(reportDto.getType());
+            ReportType reportType = ReportType.fromString(reportDto.getType());
+
+            report.setType(reportType);
             report.setDescription(reportDto.getDescription());
             report.setLocation(reportDto.getLocation());
             report.setLocationUrl(reportDto.getLocationUrl());
             report.setIsAnonymous(reportDto.getIsAnonymous());
             report.setContactPhone(reportDto.getContactPhone());
             report.setContactEmail(reportDto.getContactEmail());
+            report.setReportEvidences(new ArrayList<>());
 
             if(!reportDto.getIsAnonymous()){
-                personService.createPerson(reportDto.getPerson());
+                Person person =personService.createPerson(reportDto.getPerson());
+                report.setPerson(person);
             }
 
-            return reportRepository.save(report);
+            var newReport = reportRepository.save(report);
+            notificationFactory.getStrategy(ReportNotificationFactory.NotificationType.CREATED)
+                    .sendNotification(newReport);
+
+            return newReport;
         }catch (Exception e){
             throw e;
         }
@@ -66,11 +76,11 @@ public class ReportServiceImpl implements IReportService {
     @Override
     public Report findReportById(UUID id) {
         try{
-            var report = reportRepository.findById(id).orElse(null);
+            var report = reportRepository.findByIdWithEvidence(id).orElse(null);
             if (report == null){
                 throw new HttpError(HttpStatus.FOUND, "Report with id not Exist");
             }
-            return reportRepository.save(report);
+            return report;
         }catch (Exception e){
             throw e;
         }
@@ -79,24 +89,60 @@ public class ReportServiceImpl implements IReportService {
     /**
      * Este método permite cambiar el estado de un reporte.
      *
-     * @param id codigo unico de identificacion par aun reporte.
-     * @param status nuevo estado a asignar.
+     * @param reportDto contiene el id de reporte y el nuevo estado a asignar
      * @throws HttpError Error inesperado en el proceso.
      */
     @Override
-    public void updateStatusReport(UUID id, String status) {
+    public Report updateStatusReport(UpdateStatusReportDto reportDto) {
         try{
-            var report = reportRepository.findById(id).orElse(null);
+            var report = reportRepository.findById(reportDto.getReportId()).orElse(null);
             if (report == null){
                 throw new HttpError(HttpStatus.FOUND, "Report with id not exists");
             }
-            ReportStatus newStatus = ReportStatus.fromString(status);
+            ReportStatus newStatus = ReportStatus.fromString(reportDto.getStatus());
+            validStatusTransition(report.getStatus(), newStatus);
             report.setStatus(newStatus);
 
-            reportRepository.save(report);
+            report = reportRepository.save(report);
+            notificationFactory.getStrategy(ReportNotificationFactory.NotificationType.STATUS_CHANGED)
+                    .sendNotification(report);
+
+           return report;
         }catch (Exception e){
             throw e;
         }
+    }
+
+    private void validStatusTransition(ReportStatus oldStatus, ReportStatus newStatus){
+
+        // Estados finales → no permitir cambios
+        if (oldStatus == ReportStatus.RESOLVED ||
+                oldStatus == ReportStatus.REJECTED ||
+                oldStatus == ReportStatus.DISCARDED) {
+
+            throw new HttpError(HttpStatus.BAD_REQUEST,
+                    "No se puede cambiar el estado de un reporte cerrado");
+        }
+
+        // No permitir regresión
+        if (oldStatus == ReportStatus.IN_PROGRESS && newStatus == ReportStatus.PENDING) {
+            throw new HttpError(HttpStatus.BAD_REQUEST,
+                    "No se puede regresar un reporte en progreso a pendiente");
+        }
+
+        // No permitir cerrar directamente desde PENDING
+        if (oldStatus == ReportStatus.PENDING &&
+                (newStatus == ReportStatus.RESOLVED)) {
+
+            throw new HttpError(HttpStatus.BAD_REQUEST,
+                    "No se puede resolver un reporte que no ha iniciado");
+        }
+
+//        // Si el viejo y nuevo estado son iguales
+//        if (oldStatus == newStatus) {
+//            throw new HttpError(HttpStatus.BAD_REQUEST,
+//                    "El reporte ya está en el estado " + newStatus);
+//        }
     }
 
     /**

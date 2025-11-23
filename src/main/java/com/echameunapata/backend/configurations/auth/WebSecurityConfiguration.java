@@ -68,18 +68,19 @@ public class WebSecurityConfiguration {
 
         httpSecurity.authorizeHttpRequests(auth -> {
             // 1. Endpoints de Autenticación
-            auth.requestMatchers(apiBasePath + "/auth/**").permitAll();
+            auth.requestMatchers(apiBasePath + "/auth/**",
+                    apiBasePath+"/reports/create").permitAll();
 
-            // 2. Endpoints Públicos (Según SRS y diseño)
-            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/public/**").permitAll();
-            // Catálogo público de animales
-            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/animals/**").permitAll();
-            // Formulario público de adopción
-            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/adoptions").permitAll();
-            // Formulario público de denuncias
-            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/reports").permitAll();
-
-            // 3. Resto de endpoints requieren autenticación
+//            // 2. Endpoints Públicos (Según SRS y diseño)
+//            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/public/**").permitAll();
+//            // Catálogo público de animales
+//            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/animals/**").permitAll();
+//            // Formulario público de adopción
+//            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/adoptions").permitAll();
+//            // Formulario público de denuncias
+//            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/reports").permitAll();
+//
+//            // 3. Resto de endpoints requieren autenticación
             auth.anyRequest().authenticated();
         });
 
