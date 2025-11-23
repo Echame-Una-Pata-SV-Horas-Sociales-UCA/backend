@@ -3,6 +3,7 @@ package com.echameunapata.backend.controllers;
 import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
 import com.echameunapata.backend.domain.dtos.commons.PageResponse;
 import com.echameunapata.backend.domain.dtos.reports.CreateReportDto;
+import com.echameunapata.backend.domain.dtos.reports.FindReportAndEvidencesDto;
 import com.echameunapata.backend.domain.dtos.reports.FindReportDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateStatusReportDto;
 import com.echameunapata.backend.domain.models.Report;
@@ -122,7 +123,7 @@ public class ReportController {
     public ResponseEntity<GeneralResponse>findById(@PathVariable("id") UUID id){
         try {
             Report report = reportService.findReportById(id);
-            FindReportDto resp = modelMapper.map(report, FindReportDto.class);
+            FindReportAndEvidencesDto resp = modelMapper.map(report, FindReportAndEvidencesDto.class);
 
             return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", resp);
         }catch (HttpError e){

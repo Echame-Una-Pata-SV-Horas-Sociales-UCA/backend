@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class CreateEvidenceDto {
     @NotNull
-    private List<MultipartFile> images;
+    private MultipartFile[] images;
     @NotEmpty(message = "Description cannot be empty")
     private String description;
 }

@@ -32,7 +32,7 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"reportEvidences"})
+    @EntityGraph(attributePaths = {"person", "reportEvidences"})
     @Query("SELECT r FROM Report r WHERE r.id = :id")
     Optional<Report> findByIdWithEvidence(@Param("id") UUID id);
 

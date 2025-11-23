@@ -73,7 +73,7 @@ public class EvidenceServiceImpl implements IEvidenceService {
     @Override
     public List<ReportEvidence> findAllEvidencesByReport(UUID reportId) {
         try{
-            var evidences = evidenceRepository.findAll();
+            var evidences = evidenceRepository.findALlByReportId(reportId);
             if(evidences.isEmpty()){
                 return new ArrayList<>();
             }
@@ -91,12 +91,13 @@ public class EvidenceServiceImpl implements IEvidenceService {
      * @throws HttpError Error inesperado en el proceso.
      */
     @Override
-    public void deleteEvidence(UUID id) {
+    public void deleteEvidence(UUID id) throws IOException {
         try{
             var evidence = evidenceRepository.findById(id).orElse(null);
             if (evidence == null){
                 throw new HttpError(HttpStatus.FOUND, "Evidence with id not Exist");
             }
+            fileStorageService.deleteFile(evidence.getProviderPublicId());
             evidenceRepository.delete(evidence);
         }catch (Exception e){
             throw e;
