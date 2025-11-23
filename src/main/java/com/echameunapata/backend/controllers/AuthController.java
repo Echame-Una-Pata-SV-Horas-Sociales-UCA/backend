@@ -52,6 +52,7 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<GeneralResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new HttpError(HttpStatus.BAD_REQUEST, "Passwords do not match");
         }

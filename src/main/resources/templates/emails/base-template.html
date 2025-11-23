@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f7;
+            font-family: Arial, sans-serif;
+        }
+
+        .email-wrapper {
+            width: 100%;
+            padding: 30px 0;
+            background-color: #f2f2f7;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        }
+
+        .header {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .content {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        ul li { margin-bottom: 4px; }
+    </style>
+</head>
+
+<body>
+<div class="email-wrapper">
+    <div class="email-container">
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="cid:logoschema" alt="Logo" width="120" style="border-radius: 8px;">
+        </div>
+
+        <div class="header">
+            {{title}}
+        </div>
+
+        <div class="content">
+            {{content}}
+        </div>
+
+        <div class="footer">
+            © {{year}} - Sistema de Reportes Echame una pata
+        </div>
+    </div>
+</div>
+</body>
+</html>

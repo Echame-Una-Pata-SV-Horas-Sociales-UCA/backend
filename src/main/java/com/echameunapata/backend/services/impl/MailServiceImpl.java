@@ -1,10 +1,11 @@
 package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.services.contract.IMailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,24 +21,23 @@ public class MailServiceImpl implements IMailService {
     }
 
     @Override
-    public void sendEmail(String userEmail, String subject, String body) {
-        // SimpleMailMessage es la clase de Spring para correos de texto plano
-        SimpleMailMessage message = new SimpleMailMessage();
+    public void sendEmail(String userEmail, String subject, String htmlBody) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        // Configuramos el remitente (leído desde properties)
-        message.setFrom(fromEmail);
 
-        // Configuramos el destinatario
-        message.setTo(userEmail);
+            helper.setFrom(fromEmail);
+            helper.setTo(userEmail);
+            helper.setSubject(subject);
 
-        // Asunto del correo
-        message.setSubject(subject);
+            helper.setText(htmlBody, true);
 
-        // Cuerpo del correo
-        message.setText(body);
+            mailSender.send(message);
 
-        // ¡El envío!
-        // Esto usa la conexión SMTP a Brevo y envía el correo.
-        mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Error enviando email", e);
+        }
+
     }
 }

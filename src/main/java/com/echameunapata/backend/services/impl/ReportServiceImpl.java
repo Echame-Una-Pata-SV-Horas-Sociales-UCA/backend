@@ -3,6 +3,7 @@ package com.echameunapata.backend.services.impl;
 import com.echameunapata.backend.domain.dtos.reports.CreateReportDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateReportInfoDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateStatusReportDto;
+import com.echameunapata.backend.domain.enums.notifications.NotificationType;
 import com.echameunapata.backend.domain.enums.reports.ReportStatus;
 import com.echameunapata.backend.domain.enums.reports.ReportType;
 import com.echameunapata.backend.domain.models.Person;
@@ -10,7 +11,7 @@ import com.echameunapata.backend.domain.models.Report;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.ReportRepository;
 import com.echameunapata.backend.services.contract.IReportService;
-import com.echameunapata.backend.services.notifications.factory.ReportNotificationFactory;
+import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class ReportServiceImpl implements IReportService {
 
     private final ReportRepository reportRepository;
     private final PersonServiceImpl personService;
-    private final ReportNotificationFactory notificationFactory;
+    private final NotificationFactory notificationFactory;
 
     /**
      * Este método permite crear un nuevo reporte
@@ -57,7 +58,7 @@ public class ReportServiceImpl implements IReportService {
             }
 
             var newReport = reportRepository.save(report);
-            notificationFactory.getStrategy(ReportNotificationFactory.NotificationType.CREATED)
+            notificationFactory.getStrategy(NotificationType.REPORT_CREATED)
                     .sendNotification(newReport);
 
             return newReport;
@@ -104,7 +105,7 @@ public class ReportServiceImpl implements IReportService {
             report.setStatus(newStatus);
 
             report = reportRepository.save(report);
-            notificationFactory.getStrategy(ReportNotificationFactory.NotificationType.STATUS_CHANGED)
+            notificationFactory.getStrategy(NotificationType.REPORT_STATUS_CHANGED)
                     .sendNotification(report);
 
            return report;

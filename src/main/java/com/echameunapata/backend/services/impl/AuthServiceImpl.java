@@ -2,6 +2,7 @@ package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.dtos.auth.LoginDto;
 import com.echameunapata.backend.domain.dtos.auth.RegisterUserDto;
+import com.echameunapata.backend.domain.enums.notifications.NotificationType;
 import com.echameunapata.backend.domain.models.Role;
 import com.echameunapata.backend.domain.models.Token;
 import com.echameunapata.backend.domain.models.User;
@@ -11,9 +12,10 @@ import com.echameunapata.backend.repositories.UserRepository;
 import com.echameunapata.backend.services.contract.IAuthService;
 import com.echameunapata.backend.services.contract.IMailService;
 import com.echameunapata.backend.services.contract.IRoleService;
+import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import com.echameunapata.backend.utils.token.JwtTools;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,10 +23,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
     private static final String TOKEN_TYPE_PASSWORD_RESET = "PASSWORD_RESET";
@@ -37,15 +39,7 @@ public class AuthServiceImpl implements IAuthService {
     private final TokenRepository tokenRepository;
 
     private final IMailService mailService;
-
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, IRoleService roleService, JwtTools jwtTools, TokenRepository tokenRepository, IMailService mailService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.roleService = roleService;
-        this.jwtTools = jwtTools;
-        this.tokenRepository = tokenRepository;
-        this.mailService = mailService;
-    }
+    private final NotificationFactory notificationFactory;
 
     /**
      * Este método registra un nuevo usuario.
@@ -139,16 +133,8 @@ public class AuthServiceImpl implements IAuthService {
         resetToken.setToken(shortToken);
         tokenRepository.save(resetToken);
 
-        // Enviamos el email con el token de reseteo
-        String mailBody = "Hola " + user.getName() + ",\n\n"
-                + "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n"
-                + "Utiliza el siguiente token para restablecer tu contraseña. Este token es válido por 1 hora:\n\n"
-                + resetToken.getToken() + "\n\n"
-                + "Si no has solicitado este cambio, puedes ignorar este correo electrónico.\n\n"
-                + "Saludos,\n"
-                + "El equipo de 'Echame Una Pata El Salvador'";
-
-        mailService.sendEmail(user.getEmail(), "Forgot Password Reset Token", mailBody);
+         notificationFactory.getStrategy(NotificationType.FORGOT_PASSWORD)
+                 .sendNotification(resetToken);
     }
 
     @Override
