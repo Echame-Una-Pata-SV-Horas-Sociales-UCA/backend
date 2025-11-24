@@ -39,6 +39,7 @@ public class Person {
     private User user;
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Report> complaints;
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)

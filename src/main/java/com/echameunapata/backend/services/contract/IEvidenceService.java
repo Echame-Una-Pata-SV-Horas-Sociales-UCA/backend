@@ -10,6 +10,6 @@ import java.util.UUID;
 public interface IEvidenceService {
     void createEvidence(CreateEvidenceDto evidenceDto, UUID reportId) throws IOException;
     List<ReportEvidence>findAllEvidencesByReport(UUID reportId);
-    void deleteEvidence(UUID id);
+    void deleteEvidence(UUID id) throws IOException;
     ReportEvidence findEvidenceById(UUID id);
 }

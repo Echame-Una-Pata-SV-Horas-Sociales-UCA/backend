@@ -1,14 +1,17 @@
 package com.echameunapata.backend.domain.dtos.reports;
 
 import com.echameunapata.backend.domain.dtos.person.PersonDto;
+import com.echameunapata.backend.domain.dtos.reportEvidence.FindEvidencesDto;
 import lombok.Data;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
-public class FindReportDto {
+public class FindReportAndEvidencesDto {
+
     private UUID id;
     private String type;
     private String description;
@@ -26,4 +29,5 @@ public class FindReportDto {
     private Timestamp updatedAt;
 
     private PersonDto person;
+    private List<FindEvidencesDto>evidences;
 }

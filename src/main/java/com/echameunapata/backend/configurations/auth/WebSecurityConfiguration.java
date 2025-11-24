@@ -68,8 +68,11 @@ public class WebSecurityConfiguration {
 
         httpSecurity.authorizeHttpRequests(auth -> {
             // 1. Endpoints de Autenticación
-            auth.requestMatchers(apiBasePath + "/auth/**",
-                    apiBasePath+"/reports/create").permitAll();
+            auth.requestMatchers(
+                    apiBasePath + "/auth/**",
+                    apiBasePath +"/reports/create",
+                    apiBasePath + "/evidence/create/**"
+                    ).permitAll();
 
 //            // 2. Endpoints Públicos (Según SRS y diseño)
 //            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/public/**").permitAll();
