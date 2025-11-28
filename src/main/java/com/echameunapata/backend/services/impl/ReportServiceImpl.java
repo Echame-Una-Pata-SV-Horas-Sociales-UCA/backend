@@ -139,11 +139,6 @@ public class ReportServiceImpl implements IReportService {
                     "No se puede resolver un reporte que no ha iniciado");
         }
 
-//        // Si el viejo y nuevo estado son iguales
-//        if (oldStatus == newStatus) {
-//            throw new HttpError(HttpStatus.BAD_REQUEST,
-//                    "El reporte ya está en el estado " + newStatus);
-//        }
     }
 
     /**

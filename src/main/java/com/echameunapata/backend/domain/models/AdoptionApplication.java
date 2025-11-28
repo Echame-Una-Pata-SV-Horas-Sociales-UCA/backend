@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class AdoptionApplication {
     private UUID id;
 
     @NotNull(message = "Animal cannot be null")
-    private LocalDate applicationDate;
+    private Instant applicationDate;
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status cannot be null")
@@ -58,4 +59,9 @@ public class AdoptionApplication {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoptionApplication")
     private Set<AdoptionReference> adoptionReferences;
+
+    @PrePersist
+    public void prePersist(){
+        this.applicationDate =  Instant.now();
+    }
 }

@@ -11,6 +11,18 @@ import java.util.Map;
 @Service
 public class TemplateServiceImpl implements ITemplateService {
 
+    /**
+     * Renderiza una plantilla HTML de correo reemplazando sus variables.
+     *
+     * Este método carga un archivo de plantilla ubicado en el classpath dentro de
+     * la carpeta `templates/emails/` y sustituye todas las variables declaradas con
+     * el formato `{{variable}}` por los valores proporcionados en el mapa.
+     *
+     * @param templateName nombre del archivo de plantilla a renderizar.
+     * @param variables mapa de variables y sus valores a reemplazar dentro de la plantilla.
+     * @return Cadena con el contenido de la plantilla renderizada.
+     * @throws RuntimeException Si la plantilla no puede ser cargada.
+     */
     @Override
     public String renderTemplate(String templateName, Map<String, Object> variables) {
         try {
