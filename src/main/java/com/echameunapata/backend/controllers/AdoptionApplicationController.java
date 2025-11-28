@@ -51,9 +51,9 @@ public class AdoptionApplicationController {
     ){
         try{
             Page<AdoptionApplication> applications = adoptionApplicationService.findAllApplications(status, startDate, endDate, pageable);
-            Page<FindApplicationWithPersonAndAnimalDto> dtoPage = applications.map(application -> modelMapper.map(application, FindApplicationWithPersonAndAnimalDto.class));
+            Page<FindApplicationDto> dtoPage = applications.map(application -> modelMapper.map(application, FindApplicationDto.class));
 
-            PageResponse<FindApplicationWithPersonAndAnimalDto> response = new PageResponse<>(
+            PageResponse<FindApplicationDto> response = new PageResponse<>(
                     dtoPage.getContent(),
                     dtoPage.getNumber(),
                     dtoPage.getSize(),
