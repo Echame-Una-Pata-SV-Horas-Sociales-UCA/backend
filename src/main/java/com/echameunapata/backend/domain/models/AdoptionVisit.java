@@ -24,7 +24,7 @@ public class AdoptionVisit {
     private String scheduledDate;
 
     @Enumerated(EnumType.STRING)
-    private AdoptionVisitStatus status;
+    private AdoptionVisitStatus status = AdoptionVisitStatus.SCHEDULED;
 
     @Column( columnDefinition = "TEXT")
     private String observations;

@@ -2,7 +2,10 @@ package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.dtos.adoption.application.visit.ProgramingVisitDto;
 import com.echameunapata.backend.domain.dtos.adoption.application.visit.UpdateVisitDto;
+import com.echameunapata.backend.domain.enums.adoptions.AdoptionStatus;
+import com.echameunapata.backend.domain.enums.adoptions.AdoptionVisitStatus;
 import com.echameunapata.backend.domain.enums.notifications.NotificationType;
+import com.echameunapata.backend.domain.models.AdoptionApplication;
 import com.echameunapata.backend.domain.models.AdoptionVisit;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.AdoptionVisitRepository;
@@ -12,6 +15,8 @@ import com.echameunapata.backend.services.notifications.factory.NotificationFact
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -25,10 +30,16 @@ public class AdoptionVisitServiceImpl implements IAdoptionVisitService {
     public void programingVisit(ProgramingVisitDto visitDto) {
         try{
             var application = applicationService.findApplicationById(visitDto.getApplicationId());
-            var visit = adoptionVisitRepository.findByAdoptionApplication(application).orElse(null);
+            var visit = adoptionVisitRepository.findByAdoptionApplicationAndStatus(application, AdoptionVisitStatus.SCHEDULED).orElse(null);
 
+            // si ya hay visita agendada no se debe crear otra
             if(visit != null){
                 throw new HttpError(HttpStatus.CONFLICT, "Visit already programing");
+            }
+
+            //si la aplicacion a adopcion no esta en revision no hay que agendar cita aun
+            if(!AdoptionStatus.IN_REVIEW.equals(application.getStatus()) && application.getAcceptsVisits()){
+                throw new HttpError(HttpStatus.NOT_FOUND, "Invalid status in application for programing visit");
             }
 
             visit = new AdoptionVisit();
@@ -45,8 +56,46 @@ public class AdoptionVisitServiceImpl implements IAdoptionVisitService {
         }
     }
 
+
     @Override
     public AdoptionVisit updateStatusAndObservations(UpdateVisitDto updateVisitDto) {
-        return null;
+        try{
+            var adoptionVisit = adoptionVisitRepository.findById(updateVisitDto.getId()).orElse(null);
+            if(adoptionVisit == null){
+                throw new HttpError(HttpStatus.NOT_FOUND, "Invalid visit");
+            }
+            validateVisitStateTransition(adoptionVisit.getStatus(), updateVisitDto.getStatus());
+
+            adoptionVisit.setObservations(updateVisitDto.getObservations());
+            adoptionVisit.setStatus(updateVisitDto.getStatus());
+
+            return adoptionVisitRepository.save(adoptionVisit);
+        }catch (HttpError e){
+            throw e;
+        }
     }
+
+    private void validateVisitStateTransition(AdoptionVisitStatus current, AdoptionVisitStatus next) {
+
+        if (current == AdoptionVisitStatus.COMPLETED) {
+            throw new HttpError(HttpStatus.CONFLICT,
+                    "A completed visit cannot change its state");
+        }
+
+        if (current == AdoptionVisitStatus.CANCELLED) {
+            throw new HttpError(HttpStatus.CONFLICT,
+                    "A canceled visit cannot change its state");
+        }
+
+        if (current == AdoptionVisitStatus.SCHEDULED) {
+            if (next != AdoptionVisitStatus.COMPLETED && next != AdoptionVisitStatus.CANCELLED) {
+                throw new HttpError(HttpStatus.CONFLICT,
+                        "Scheduled visits can only be completed or canceled");
+            }
+            return;
+        }
+
+        throw new HttpError(HttpStatus.BAD_REQUEST, "Invalid visit state transition");
+    }
+
 }

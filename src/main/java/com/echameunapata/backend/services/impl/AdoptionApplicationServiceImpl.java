@@ -37,7 +37,6 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
 
     /**
      * Crea una nueva solicitud de adopción.
-     *
      * Este método valida y construye la información necesaria para la creación de una adopción:
      * - Crea o recupera la información de la persona solicitante.
      * - Busca el animal asociado por su ID.
@@ -109,7 +108,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     public Page<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate, Pageable pageable) {
         try{
             AdoptionStatus adoptionStatus = (status != null && !status.isBlank()) ? AdoptionStatus.fromString(status) : null;
-            Page<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate, pageable);
+            Page<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate,true, pageable );
 
             return applications;
         }catch (HttpError e){
@@ -161,8 +160,11 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
 
             application.setObservations(applicationDto.getObservations());
 
-            AdoptionApplication saved = applicationRepository.save(application);
+            if (AdoptionStatus.APPROVED.equals(application.getStatus())){
+                application.setIsApplication(false);
+            }
 
+            AdoptionApplication saved = applicationRepository.save(application);
             processStatusChange(application);
 
             return saved;
@@ -171,22 +173,40 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
         }
     }
 
-    //metodo para validar los cambios de estado
     private void validateStatusTransition(AdoptionStatus current, AdoptionStatus next) {
 
+        // Si el estado no cambia, no hay problema
         if (current == next) return;
 
-        if (current == AdoptionStatus.APPROVED && next != AdoptionStatus.APPROVED) {
+        // Si está aprobado o rechazado, no puede cambiar nunca
+        if (current == AdoptionStatus.APPROVED) {
             throw new HttpError(HttpStatus.BAD_REQUEST,
                     "Una aplicación aprobada no puede cambiar a otro estado.");
         }
 
-        if (current == AdoptionStatus.REJECTED && next != AdoptionStatus.REJECTED) {
+        if (current == AdoptionStatus.REJECTED) {
             throw new HttpError(HttpStatus.BAD_REQUEST,
                     "Una aplicación rechazada no puede cambiar a otro estado.");
         }
 
+        // PENDING solo puede ir a IN_REVIEW
+        if (current == AdoptionStatus.PENDING) {
+            if (next != AdoptionStatus.IN_REVIEW) {
+                throw new HttpError(HttpStatus.BAD_REQUEST,
+                        "Una aplicación en estado PENDING solo puede pasar a IN_REVIEW.");
+            }
+            return;
+        }
+
+        // IN_REVIEW solo puede ir a APPROVED o REJECTED
+        if (current == AdoptionStatus.IN_REVIEW) {
+            if (next != AdoptionStatus.APPROVED && next != AdoptionStatus.REJECTED) {
+                throw new HttpError(HttpStatus.BAD_REQUEST,
+                        "Una aplicación en revisión solo puede ser APROBADA o RECHAZADA.");
+            }
+        }
     }
+
 
     //metodo para procesar los cambios de estado
     private void processStatusChange(AdoptionApplication application) {
@@ -195,6 +215,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
             switch (application.getStatus()) {
                 case APPROVED -> handleApproved(application);
                 case REJECTED -> handleRejected(application);
+                case IN_REVIEW -> handleInReview(application);
                 case PENDING -> handleCreate(application);
                 default -> { /* no action */ }
             }
@@ -224,5 +245,11 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
         notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REGISTERED)
                 .sendNotification(application);
     }
+    private void handleInReview(AdoptionApplication application){
+        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_IN_REVIEW)
+                .sendNotification(application);
+    }
+
+
 
 }
