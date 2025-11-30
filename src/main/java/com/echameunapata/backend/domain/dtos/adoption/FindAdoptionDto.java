@@ -1,7 +1,7 @@
 package com.echameunapata.backend.domain.dtos.adoption;
 
 import com.echameunapata.backend.domain.dtos.adoption.application.FindApplicationDto;
-import com.echameunapata.backend.domain.dtos.animal.FindAnimalDto;
+import com.echameunapata.backend.domain.dtos.animal.FindAnimalWithPhotosDto;
 import com.echameunapata.backend.domain.dtos.person.PersonDto;
 import lombok.Data;
 
@@ -18,7 +18,7 @@ public class FindAdoptionDto {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    private FindAnimalDto animal;
+    private FindAnimalWithPhotosDto animal;
     private PersonDto adopter;
 
     private FindApplicationDto adoptionApplication;

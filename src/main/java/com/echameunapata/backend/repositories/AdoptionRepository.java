@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface AdoptionRepository extends JpaRepository<Adoption, UUID> {
     Adoption findByAdoptionApplicationId(UUID adoptionApplicationID);
 
-    @EntityGraph(attributePaths = {"adopter", "animal", "animal.photos", "adoptionApplication"})
+    @EntityGraph(attributePaths = {"adopter", "animal", "adoptionApplication"})
     @NonNull
     Page<Adoption>findAll(@NonNull Pageable pageable);
 

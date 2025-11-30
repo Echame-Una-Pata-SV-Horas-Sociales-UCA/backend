@@ -41,7 +41,7 @@ public class Animal {
 
     @Column(columnDefinition = "TEXT")
     private String initialDescription;
-    private Boolean sterilized;
+    private Boolean sterilized =false;
     private Boolean missingLimb = false;
     @Column(columnDefinition = "TEXT")
     private String observations;

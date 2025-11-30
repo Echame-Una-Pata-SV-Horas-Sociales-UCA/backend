@@ -171,6 +171,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
         }
     }
 
+    //metodo para validar los cambios de estado
     private void validateStatusTransition(AdoptionStatus current, AdoptionStatus next) {
 
         if (current == next) return;
@@ -187,8 +188,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
 
     }
 
-
-
+    //metodo para procesar los cambios de estado
     private void processStatusChange(AdoptionApplication application) {
 
         try {

@@ -13,8 +13,8 @@ import java.util.UUID;
 public interface IAnimalService {
     Animal registerAnimal(RegisterAnimalDto animalDto);
     void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto);
-    Page<Animal> findAllAnimalsState(String  stateString, Pageable pageable);
+    Page<Animal> findAllAnimals(String stateString, String sexString, Pageable pageable);
     Animal findById(UUID animalId);
     Animal findByName(String name);
-    Animal updateAnimalStatus(UUID animalId, AnimalState status);
+    void updateAnimalStatus(UUID animalId, AnimalState status);
 }

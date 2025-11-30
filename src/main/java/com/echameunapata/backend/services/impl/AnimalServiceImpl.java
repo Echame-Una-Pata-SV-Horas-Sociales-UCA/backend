@@ -3,11 +3,10 @@ package com.echameunapata.backend.services.impl;
 import com.echameunapata.backend.domain.dtos.animal.RegisterAnimalDto;
 
 import com.echameunapata.backend.domain.dtos.animal.UpdateAnimalInfoDto;
-import com.echameunapata.backend.domain.enums.animals.AnimalSpecies;
+import com.echameunapata.backend.domain.enums.animals.AnimalSex;
 import com.echameunapata.backend.domain.enums.animals.AnimalState;
 import com.echameunapata.backend.domain.models.Animal;
 import com.echameunapata.backend.domain.models.AnimalPhoto;
-import com.echameunapata.backend.domain.models.ReportEvidence;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.AnimalPhotoRepository;
 import com.echameunapata.backend.repositories.AnimalRepository;
@@ -16,14 +15,12 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -148,18 +145,12 @@ public class AnimalServiceImpl implements IAnimalService {
      * @throws HttpError Si ocurre un error inesperado durante la consulta.
      */
     @Override
-    public Page<Animal> findAllAnimalsState(String stateString, Pageable pageable) {
+    public Page<Animal> findAllAnimals(String stateString, String sexString, Pageable pageable) {
         try{
-            Page<Animal> animals;
+            AnimalSex animalSex = (sexString != null && !sexString.isBlank()) ? AnimalSex.fromString(sexString) : null;
+            AnimalState animalState = (stateString != null && !stateString.isBlank()) ? AnimalState.fromString(stateString) : null;
 
-            if (stateString.isEmpty()){
-               animals = animalRepository.findAll(pageable);
-            }
-            else{
-                AnimalState state = AnimalState.fromString(stateString);
-                animals = animalRepository.findAllByState(state, pageable);
-            }
-
+            Page <Animal> animals= animalRepository.findAllByFilters(animalSex, animalState, pageable);
             return animals;
         }catch (Exception e){
             throw e;
@@ -210,7 +201,7 @@ public class AnimalServiceImpl implements IAnimalService {
     }
 
     @Override
-    public Animal updateAnimalStatus(UUID animalId, AnimalState status) {
+    public void updateAnimalStatus(UUID animalId, AnimalState status) {
         try{
             var animal = animalRepository.findById(animalId).orElse(null);
             if(animal == null){
@@ -218,7 +209,7 @@ public class AnimalServiceImpl implements IAnimalService {
             }
 
             animal.setState(status);
-            return animalRepository.save(animal);
+            animalRepository.save(animal);
         }catch (HttpError e){
             throw e;
         }
