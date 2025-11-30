@@ -3,33 +3,39 @@ package com.echameunapata.backend.services.impl;
 import com.echameunapata.backend.domain.dtos.animal.RegisterAnimalDto;
 
 import com.echameunapata.backend.domain.dtos.animal.UpdateAnimalInfoDto;
+import com.echameunapata.backend.domain.enums.animals.AnimalSpecies;
 import com.echameunapata.backend.domain.enums.animals.AnimalState;
 import com.echameunapata.backend.domain.models.Animal;
+import com.echameunapata.backend.domain.models.AnimalPhoto;
+import com.echameunapata.backend.domain.models.ReportEvidence;
 import com.echameunapata.backend.exceptions.HttpError;
+import com.echameunapata.backend.repositories.AnimalPhotoRepository;
 import com.echameunapata.backend.repositories.AnimalRepository;
 import com.echameunapata.backend.services.contract.IAnimalService;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class AnimalServiceImpl implements IAnimalService {
 
     private final AnimalRepository animalRepository;
     private final ModelMapper modelMapper;
-
-    public AnimalServiceImpl(AnimalRepository animalRepository, ModelMapper modelMapper) {
-        this.animalRepository = animalRepository;
-        this.modelMapper = modelMapper;
-    }
+    private final AnimalPhotoRepository animalPhotoRepository;
+    private final FileStorageServiceImpl fileStorageService;
 
     /**
      * Registra un nuevo animal en el sistema.
@@ -44,16 +50,64 @@ public class AnimalServiceImpl implements IAnimalService {
     @Override
     public Animal registerAnimal(RegisterAnimalDto animalDto) {
         try{
-            var animal = animalRepository.findByName(animalDto.getName());
-            if(animal != null){
+
+            if(animalRepository.findByName(animalDto.getName()) != null){
                 throw new HttpError(HttpStatus.CONFLICT, "Name of the animal already in use");
             }
 
-            animal = modelMapper.map(animalDto, Animal.class);
+            Animal animal = getAnimal(animalDto);
 
-            return animalRepository.save(animal);
+            Animal saveAnimal = animalRepository.save(animal);
+
+            savePhotos(animalDto.getPhotos(), saveAnimal);
+
+            return saveAnimal;
         }catch (Exception e){
             throw e;
+        }
+    }
+
+    private static Animal getAnimal(RegisterAnimalDto animalDto) {
+        Animal animal = new Animal();
+        animal.setName(animalDto.getName());
+        animal.setSpecies(animalDto.getSpecies());
+        animal.setSex(animalDto.getSex());
+        animal.setRace(animalDto.getRace());
+        animal.setBirthDate(animalDto.getBirthDate());
+        animal.setRescueDate(animalDto.getRescueDate());
+        animal.setRescueLocation(animalDto.getRescueLocation());
+        animal.setInitialDescription(animalDto.getInitialDescription());
+        animal.setMissingLimb(animalDto.getMissingLimb());
+        animal.setObservations(animalDto.getObservations());
+        return animal;
+    }
+
+
+    private void savePhotos(List<MultipartFile> images, Animal animal){
+        try{
+            if(images.isEmpty()){
+                return;
+            }
+
+            for (MultipartFile image: images){
+                Map<String, Object> dataImage = fileStorageService.uploadFile(image, "animals/" + animal.getName());
+                AnimalPhoto photo = new AnimalPhoto();
+
+                photo.setUrl((String) dataImage.get("url"));
+
+                photo.setAnimal(animal);
+                photo.setProvider("Cloudinary");
+                photo.setProviderPublicId((String) dataImage.get("public_id"));
+                photo.setSecureUrl((String) dataImage.get("secure_url"));
+                photo.setContentType((String) dataImage.get("resource_type"));
+                photo.setSizeBytes(
+                        Long.parseLong(dataImage.get("bytes").toString())
+                );
+
+                animalPhotoRepository.save(photo);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -151,6 +205,21 @@ public class AnimalServiceImpl implements IAnimalService {
 
             return animal;
         }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public Animal updateAnimalStatus(UUID animalId, AnimalState status) {
+        try{
+            var animal = animalRepository.findById(animalId).orElse(null);
+            if(animal == null){
+                throw new HttpError(HttpStatus.NOT_FOUND, "The animal with that name does not exist");
+            }
+
+            animal.setState(status);
+            return animalRepository.save(animal);
+        }catch (HttpError e){
             throw e;
         }
     }

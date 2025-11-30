@@ -20,7 +20,7 @@ public class AnimalPhoto {
     @CreationTimestamp
     private Timestamp createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "animal_id", nullable = false)
     private Animal animal;
 

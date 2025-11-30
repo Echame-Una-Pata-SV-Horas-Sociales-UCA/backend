@@ -1,6 +1,7 @@
 package com.echameunapata.backend.domain.enums.adoptions;
 
 public enum AdoptionStatus {
+    //cambiar a 2 estados, abierto o cerrado
     PENDING,
     IN_REVIEW,
     APPROVED,

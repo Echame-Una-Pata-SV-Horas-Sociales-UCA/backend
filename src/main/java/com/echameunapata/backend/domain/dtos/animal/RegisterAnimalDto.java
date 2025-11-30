@@ -7,8 +7,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class RegisterAnimalDto {
@@ -21,7 +23,7 @@ public class RegisterAnimalDto {
 
     private AnimalSex sex;
     private String race;
-
+//cambiar por edad del animal
     private LocalDate birthDate;
 
     private LocalDate rescueDate;
@@ -34,4 +36,6 @@ public class RegisterAnimalDto {
     private Boolean missingLimb;
     @Column(columnDefinition = "TEXT")
     private String observations;
+
+    private List<MultipartFile> photos;
 }

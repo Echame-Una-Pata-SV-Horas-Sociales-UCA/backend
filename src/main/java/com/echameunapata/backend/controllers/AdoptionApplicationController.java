@@ -1,9 +1,9 @@
 package com.echameunapata.backend.controllers;
 
-import com.echameunapata.backend.domain.dtos.adoption.CreateApplicationDto;
-import com.echameunapata.backend.domain.dtos.adoption.FindApplicationDto;
-import com.echameunapata.backend.domain.dtos.adoption.FindApplicationWithPersonAndAnimalDto;
-import com.echameunapata.backend.domain.dtos.adoption.UpdateStatusInApplicationDto;
+import com.echameunapata.backend.domain.dtos.adoption.application.CreateApplicationDto;
+import com.echameunapata.backend.domain.dtos.adoption.application.FindApplicationDto;
+import com.echameunapata.backend.domain.dtos.adoption.application.FindApplicationWithPersonAndAnimalDto;
+import com.echameunapata.backend.domain.dtos.adoption.application.UpdateStatusInApplicationDto;
 import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
 import com.echameunapata.backend.domain.dtos.commons.PageResponse;
 import com.echameunapata.backend.domain.models.AdoptionApplication;
@@ -23,18 +23,18 @@ import java.time.Instant;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("${api.base-path}/adoption")
+@RequestMapping("${api.base-path}/adoption/applications")
 @AllArgsConstructor
 public class AdoptionApplicationController {
 
     private final IAdoptionApplicationService adoptionApplicationService;
     private final ModelMapper modelMapper;
 
-    @PostMapping("/application")
+    @PostMapping("/create")
     public ResponseEntity<GeneralResponse>createNewApplication(@RequestBody @Valid CreateApplicationDto applicationDto){
         try{
             AdoptionApplication application = adoptionApplicationService.createApplication(applicationDto);
-            FindApplicationWithPersonAndAnimalDto resp = modelMapper.map(application, FindApplicationWithPersonAndAnimalDto.class);
+            FindApplicationDto resp = modelMapper.map(application, FindApplicationDto.class);
 
             return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", resp);
         }catch (HttpError e){
@@ -63,7 +63,8 @@ public class AdoptionApplicationController {
 
             return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", response);
         }catch (HttpError e){
-            return GeneralResponse.getResponse(e.getStatus(), e.getMessage());}
+            return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
+        }
     }
 
     @GetMapping("/find-by-id/{id}")

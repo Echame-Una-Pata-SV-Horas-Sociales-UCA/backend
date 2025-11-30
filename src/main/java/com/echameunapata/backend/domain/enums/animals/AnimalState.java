@@ -1,6 +1,7 @@
 package com.echameunapata.backend.domain.enums.animals;
 
 public enum AnimalState {
+    AVAILABLE,
     UNDER_TREATMENT,
     UNDER_ADOPTION,
     ADOPTED,

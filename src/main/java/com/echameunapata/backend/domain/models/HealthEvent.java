@@ -15,6 +15,9 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "health_events")
+//manejarlo como tratamiento que debe llevar
+// no como citas si no puntuale
+//
 public class HealthEvent {
 
     @GeneratedValue(strategy = GenerationType.UUID)

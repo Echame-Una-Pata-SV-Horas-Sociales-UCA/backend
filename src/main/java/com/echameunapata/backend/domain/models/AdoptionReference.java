@@ -15,9 +15,7 @@ public class AdoptionReference {
     @Id
     private UUID id;
 
-    @NotEmpty(message = "Name cannot be empty")
     private String name;
-    @NotEmpty(message = "Phone Number cannot be empty")
     private String phoneNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)

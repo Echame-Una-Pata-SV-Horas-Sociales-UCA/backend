@@ -11,10 +11,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("${api.base-path}/animal")
@@ -25,7 +22,7 @@ public class AnimalController {
     private final ModelMapper modelMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<GeneralResponse>registerAnimal(@RequestBody @Valid RegisterAnimalDto animalDto){
+    public ResponseEntity<GeneralResponse>registerAnimal(@ModelAttribute @Valid RegisterAnimalDto animalDto){
         try{
             Animal animal = animalService.registerAnimal(animalDto);
             FindAnimalDto resp = modelMapper.map(animal, FindAnimalDto.class);

@@ -1,4 +1,4 @@
-package com.echameunapata.backend.domain.dtos.adoption;
+package com.echameunapata.backend.domain.dtos.adoption.application;
 
 import lombok.Data;
 
