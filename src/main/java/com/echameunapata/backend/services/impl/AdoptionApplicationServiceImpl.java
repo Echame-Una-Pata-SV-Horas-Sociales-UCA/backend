@@ -1,30 +1,29 @@
 package com.echameunapata.backend.services.impl;
 
-import com.echameunapata.backend.domain.dtos.adoption.CreateApplicationDto;
-import com.echameunapata.backend.domain.dtos.adoption.UpdateStatusInApplicationDto;
+import com.echameunapata.backend.domain.dtos.adoption.application.CreateApplicationDto;
+import com.echameunapata.backend.domain.dtos.adoption.application.UpdateStatusInApplicationDto;
 import com.echameunapata.backend.domain.enums.adoptions.AdoptionStatus;
-import com.echameunapata.backend.domain.enums.reports.ReportStatus;
+import com.echameunapata.backend.domain.enums.animals.AnimalState;
+import com.echameunapata.backend.domain.enums.notifications.NotificationType;
 import com.echameunapata.backend.domain.models.AdoptionApplication;
 import com.echameunapata.backend.domain.models.Animal;
 import com.echameunapata.backend.domain.models.Person;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.AdoptionApplicationRepository;
 import com.echameunapata.backend.services.contract.IAdoptionApplicationService;
+import com.echameunapata.backend.services.contract.IAdoptionService;
 import com.echameunapata.backend.services.contract.IAnimalService;
 import com.echameunapata.backend.services.contract.IPersonService;
+import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
 
 @Service
 @AllArgsConstructor
@@ -33,11 +32,11 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     private final IAnimalService animalService;
     private final IPersonService personService;
     private final AdoptionApplicationRepository applicationRepository;
-    private final ModelMapper modelMapper;
+    private final NotificationFactory notificationFactory;
+    private final IAdoptionService adoptionService;
 
     /**
      * Crea una nueva solicitud de adopción.
-     *
      * Este método valida y construye la información necesaria para la creación de una adopción:
      * - Crea o recupera la información de la persona solicitante.
      * - Busca el animal asociado por su ID.
@@ -53,13 +52,26 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
         try{
             var person = personService.createPerson(applicationDto.getPerson());
             var animal = animalService.findById(applicationDto.getAnimalId());
+
+            if (validateStatus(animal.getState())){
+                throw new HttpError(HttpStatus.CONFLICT, "animal not available for adoption");
+            }
+
             AdoptionStatus status = AdoptionStatus.fromString(applicationDto.getStatus());
 
             var application = setApplicationData(applicationDto, animal, person, status);
-            return applicationRepository.save(application);
+            AdoptionApplication newApplication = applicationRepository.save(application);
+
+            processStatusChange(application);
+
+            return newApplication;
         }catch (HttpError e){
             throw  e;
         }
+    }
+
+    private Boolean validateStatus(AnimalState status){
+        return status.equals(AnimalState.ADOPTED)||status.equals(AnimalState.UNDER_ADOPTION);
     }
 
 
@@ -96,7 +108,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     public Page<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate, Pageable pageable) {
         try{
             AdoptionStatus adoptionStatus = (status != null && !status.isBlank()) ? AdoptionStatus.fromString(status) : null;
-            Page<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate, pageable);
+            Page<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate,true, pageable );
 
             return applications;
         }catch (HttpError e){
@@ -140,86 +152,104 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     @Override
     public AdoptionApplication updateStatusAndDescription(UpdateStatusInApplicationDto applicationDto) {
         try{
-            var adoption = findApplicationById(applicationDto.getId());
-            AdoptionStatus status = AdoptionStatus.fromString(applicationDto.getStatus());
+            var application = findApplicationById(applicationDto.getId());
 
-            validStatusTransition(adoption.getStatus(), status);
-            adoption.setStatus(status);
+            AdoptionStatus newStatus = AdoptionStatus.fromString(applicationDto.getStatus());
+            validateStatusTransition(application.getStatus(), newStatus);
+            application.setStatus(newStatus);
 
-            String updatedObs = appendObservationHistory(
-                    adoption.getObservations(),
-                    applicationDto.getObservations(),
-                    status
-            );
+            application.setObservations(applicationDto.getObservations());
 
-            adoption.setObservations(updatedObs);
+            if (AdoptionStatus.APPROVED.equals(application.getStatus())){
+                application.setIsApplication(false);
+            }
 
-            return applicationRepository.save(adoption);
+            AdoptionApplication saved = applicationRepository.save(application);
+            processStatusChange(application);
+
+            return saved;
         }catch (HttpError e){
             throw e;
         }
     }
 
-    private void validStatusTransition(AdoptionStatus oldStatus, AdoptionStatus newStatus) {
+    private void validateStatusTransition(AdoptionStatus current, AdoptionStatus next) {
 
-        // --- 1. Estados finales donde NO se permite ningún cambio ---
-        if (oldStatus == AdoptionStatus.DELIVERED ||
-                oldStatus == AdoptionStatus.FOLLOW_UP ||
-                oldStatus == AdoptionStatus.REJECTED) {
+        // Si el estado no cambia, no hay problema
+        if (current == next) return;
 
+        // Si está aprobado o rechazado, no puede cambiar nunca
+        if (current == AdoptionStatus.APPROVED) {
             throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "No se puede cambiar el estado de una solicitud finalizada o rechazada");
+                    "Una aplicación aprobada no puede cambiar a otro estado.");
         }
 
-        // --- 2. No permitir regresiones de estado ---
-        Map<AdoptionStatus, Integer> order = Map.of(
-                AdoptionStatus.PENDING, 1,
-                AdoptionStatus.IN_REVIEW, 2,
-                AdoptionStatus.APPROVED, 3,
-                AdoptionStatus.DELIVERED, 4,
-                AdoptionStatus.FOLLOW_UP, 5
-        );
-
-        if (order.get(newStatus) < order.get(oldStatus)) {
+        if (current == AdoptionStatus.REJECTED) {
             throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "No se puede retroceder el estado de la solicitud");
+                    "Una aplicación rechazada no puede cambiar a otro estado.");
         }
 
-        // No permitir entregar si no está aprobada
-        if (oldStatus != AdoptionStatus.APPROVED &&
-                newStatus == AdoptionStatus.DELIVERED) {
-
-            throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "Solo se puede entregar una mascota cuando la solicitud ha sido aprobada");
+        // PENDING solo puede ir a IN_REVIEW
+        if (current == AdoptionStatus.PENDING) {
+            if (next != AdoptionStatus.IN_REVIEW) {
+                throw new HttpError(HttpStatus.BAD_REQUEST,
+                        "Una aplicación en estado PENDING solo puede pasar a IN_REVIEW.");
+            }
+            return;
         }
 
-        // No permitir pasar a seguimiento si no se entregó primero
-        if (oldStatus != AdoptionStatus.DELIVERED &&
-                newStatus == AdoptionStatus.FOLLOW_UP) {
-
-            throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "Solo se puede pasar a seguimiento después de la entrega");
+        // IN_REVIEW solo puede ir a APPROVED o REJECTED
+        if (current == AdoptionStatus.IN_REVIEW) {
+            if (next != AdoptionStatus.APPROVED && next != AdoptionStatus.REJECTED) {
+                throw new HttpError(HttpStatus.BAD_REQUEST,
+                        "Una aplicación en revisión solo puede ser APROBADA o RECHAZADA.");
+            }
         }
     }
 
 
-    private String appendObservationHistory(String currentObservations, String newComment, AdoptionStatus newStatus) {
-        String timestamp = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                .withZone(ZoneId.of("UTC"))
-                .format(Instant.now());
+    //metodo para procesar los cambios de estado
+    private void processStatusChange(AdoptionApplication application) {
 
-        String entry = String.format(
-                "[%s] Estado cambiado a %s → \"%s\"",
-                timestamp,
-                newStatus.name(),
-                newComment
-        );
-
-        if (currentObservations == null || currentObservations.isBlank()) {
-            return entry;
+        try {
+            switch (application.getStatus()) {
+                case APPROVED -> handleApproved(application);
+                case REJECTED -> handleRejected(application);
+                case IN_REVIEW -> handleInReview(application);
+                case PENDING -> handleCreate(application);
+                default -> { /* no action */ }
+            }
+        } catch (Exception e) {
+            System.err.println("Error sending notification or creating adoption: " + e.getMessage());
         }
-
-        return currentObservations + "\n\n" + entry;
     }
+
+    private void handleApproved(AdoptionApplication application) {
+
+        adoptionService.createAdoption(application);
+        animalService.updateAnimalStatus(application.getAnimal().getId(), AnimalState.ADOPTED);
+        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_APPROVED)
+                .sendNotification(application);
+    }
+
+    private void handleRejected(AdoptionApplication application) {
+
+        animalService.updateAnimalStatus(application.getAnimal().getId(), AnimalState.AVAILABLE);
+        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REJECTED)
+                .sendNotification(application);
+    }
+
+    private void handleCreate(AdoptionApplication application){
+
+        animalService.updateAnimalStatus(application.getAnimal().getId(), AnimalState.UNDER_ADOPTION);
+        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REGISTERED)
+                .sendNotification(application);
+    }
+    private void handleInReview(AdoptionApplication application){
+        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_IN_REVIEW)
+                .sendNotification(application);
+    }
+
+
 
 }

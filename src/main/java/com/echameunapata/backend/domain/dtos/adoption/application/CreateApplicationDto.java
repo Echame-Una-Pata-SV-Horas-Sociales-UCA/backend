@@ -1,9 +1,8 @@
-package com.echameunapata.backend.domain.dtos.adoption;
+package com.echameunapata.backend.domain.dtos.adoption.application;
 
 import com.echameunapata.backend.domain.dtos.person.CreatePersonDto;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Data

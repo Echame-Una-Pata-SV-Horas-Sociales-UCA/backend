@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,7 @@ public class Adoption {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     private UUID id;
-    private LocalDate deliveryDate;
+    private Instant deliveryDate;
     private Boolean active_monitoring;
     @CreationTimestamp
     private Timestamp createdAt;
@@ -40,6 +41,11 @@ public class Adoption {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoption")
     private List<AdoptionMonitoring>adoptionMonitoring;
 
+    @PrePersist
+    public void prePersist(){
+        this.deliveryDate =  Instant.now();
+        this.active_monitoring = true;
+    }
 
 
 }

@@ -35,13 +35,13 @@ public class Animal {
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
-    private AnimalState state = AnimalState.UNDER_TREATMENT;
+    private AnimalState state = AnimalState.AVAILABLE;
     private LocalDate rescueDate;
     private String rescueLocation;
 
     @Column(columnDefinition = "TEXT")
     private String initialDescription;
-    private Boolean sterilized;
+    private Boolean sterilized =false;
     private Boolean missingLimb = false;
     @Column(columnDefinition = "TEXT")
     private String observations;

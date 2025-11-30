@@ -1,13 +1,17 @@
-package com.echameunapata.backend.domain.dtos.adoption;
+package com.echameunapata.backend.domain.dtos.adoption.application;
 
+import com.echameunapata.backend.domain.dtos.adoption.application.visit.FindVisitDto;
+import com.echameunapata.backend.domain.dtos.animal.FindAnimalDto;
+import com.echameunapata.backend.domain.dtos.person.PersonDto;
 import lombok.Data;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
-public class FindApplicationDto {
+public class FindApplicationWithPersonAndAnimalDto {
     private UUID id;
 
     private Instant applicationDate;
@@ -22,5 +26,8 @@ public class FindApplicationDto {
     private String observations;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private PersonDto person;
 
+    private FindAnimalDto animal;
+    private List<FindVisitDto> adoptionVisits;
 }

@@ -1,5 +1,6 @@
 package com.echameunapata.backend.domain.dtos.reportEvidence;
 
+import com.echameunapata.backend.domain.dtos.image.FindImagesDto;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;

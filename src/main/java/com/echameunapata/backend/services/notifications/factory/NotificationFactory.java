@@ -1,10 +1,9 @@
 package com.echameunapata.backend.services.notifications.factory;
 
 import com.echameunapata.backend.domain.enums.notifications.NotificationType;
-import com.echameunapata.backend.services.notifications.ForgotPasswordNotification;
-import com.echameunapata.backend.services.notifications.INotificationStrategy;
-import com.echameunapata.backend.services.notifications.ReportCreatedNotification;
-import com.echameunapata.backend.services.notifications.ReportStatusChangedNotification;
+import com.echameunapata.backend.domain.models.AdoptionApplication;
+import com.echameunapata.backend.domain.models.AdoptionVisit;
+import com.echameunapata.backend.services.notifications.strategies.*;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,6 +20,11 @@ public class NotificationFactory {
     private final ReportCreatedNotification reportCreated;
     private final ReportStatusChangedNotification reportStatusChanged;
     private final ForgotPasswordNotification forgotPassword;
+    private final AdoptionApplicationNotification applicationNotification;
+    private final AdoptionApplicationApprovedNotification approvedNotification;
+    private final AdoptionApplicationRejectedNotification rejectedNotification;
+    private final VisitScheduledNotification visitScheduledNotification;
+    private final ApplicationInReviewNotification inReviewNotification;
 
     private final Map<NotificationType, INotificationStrategy<?>> strategies = new HashMap<>();
 
@@ -29,6 +33,11 @@ public class NotificationFactory {
         strategies.put(REPORT_CREATED, reportCreated);
         strategies.put(REPORT_STATUS_CHANGED, reportStatusChanged);
         strategies.put(FORGOT_PASSWORD, forgotPassword);
+        strategies.put(ADOPTION_APPLICATION_REGISTERED, applicationNotification);
+        strategies.put(ADOPTION_APPLICATION_APPROVED, approvedNotification);
+        strategies.put(ADOPTION_APPLICATION_REJECTED, rejectedNotification);
+        strategies.put(ADOPTION_VISIT_SCHEDULED, visitScheduledNotification);
+        strategies.put(ADOPTION_APPLICATION_IN_REVIEW, inReviewNotification);
     }
 
     @SuppressWarnings("unchecked")

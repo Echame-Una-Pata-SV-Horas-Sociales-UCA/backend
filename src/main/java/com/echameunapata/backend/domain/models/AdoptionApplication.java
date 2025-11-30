@@ -38,6 +38,7 @@ public class AdoptionApplication {
 
     @Column(columnDefinition = "TEXT")
     private String observations;
+    private Boolean isApplication;
     @CreationTimestamp
     private Timestamp createdAt;
     @UpdateTimestamp
