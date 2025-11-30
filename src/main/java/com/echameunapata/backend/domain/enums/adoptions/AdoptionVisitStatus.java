@@ -1,12 +1,12 @@
 package com.echameunapata.backend.domain.enums.adoptions;
 
-public enum AdoptionVisitResult {
-    NOT_SUITABLE,
-    SUITABLE,
-    REQUIRED_ADJUSTMENTS;
+public enum AdoptionVisitStatus {
+    SCHEDULED,     // Programada
+    COMPLETED,     // Ya se realizó
+    CANCELLED;     //cancelada
 
-    public static AdoptionVisitResult fromString(String resultString){
-        for(AdoptionVisitResult result: AdoptionVisitResult.values()){
+    public static AdoptionVisitStatus fromString(String resultString){
+        for(AdoptionVisitStatus result: AdoptionVisitStatus.values()){
             if(result.name().equalsIgnoreCase(resultString)){
                 return result;
             }

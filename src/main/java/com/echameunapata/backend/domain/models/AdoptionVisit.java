@@ -1,6 +1,6 @@
 package com.echameunapata.backend.domain.models;
 
-import com.echameunapata.backend.domain.enums.adoptions.AdoptionVisitResult;
+import com.echameunapata.backend.domain.enums.adoptions.AdoptionVisitStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,16 +21,14 @@ public class AdoptionVisit {
     @Id
     private UUID id;
 
-    private Date date;
+    private String scheduledDate;
 
-    @NotNull(message = "Result cannot be null")
     @Enumerated(EnumType.STRING)
-    private AdoptionVisitResult result;
+    private AdoptionVisitStatus status;
 
     @Column( columnDefinition = "TEXT")
     private String observations;
 
-    @NotEmpty(message = "Evaluator name cannot be null")
     private String evaluatorName;
 
     @CreationTimestamp

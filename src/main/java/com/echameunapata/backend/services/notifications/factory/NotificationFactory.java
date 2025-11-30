@@ -1,6 +1,7 @@
 package com.echameunapata.backend.services.notifications.factory;
 
 import com.echameunapata.backend.domain.enums.notifications.NotificationType;
+import com.echameunapata.backend.domain.models.AdoptionVisit;
 import com.echameunapata.backend.services.notifications.strategies.*;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ public class NotificationFactory {
     private final AdoptionApplicationNotification applicationNotification;
     private final AdoptionApplicationApprovedNotification approvedNotification;
     private final AdoptionApplicationRejectedNotification rejectedNotification;
+    private final VisitScheduledNotification visitScheduledNotification;
 
     private final Map<NotificationType, INotificationStrategy<?>> strategies = new HashMap<>();
 
@@ -32,6 +34,7 @@ public class NotificationFactory {
         strategies.put(ADOPTION_APPLICATION_REGISTERED, applicationNotification);
         strategies.put(ADOPTION_APPLICATION_APPROVED, approvedNotification);
         strategies.put(ADOPTION_APPLICATION_REJECTED, rejectedNotification);
+        strategies.put(ADOPTION_VISIT_SCHEDULED, visitScheduledNotification);
     }
 
     @SuppressWarnings("unchecked")
