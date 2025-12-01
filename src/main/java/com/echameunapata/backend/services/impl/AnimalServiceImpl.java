@@ -70,7 +70,7 @@ public class AnimalServiceImpl implements IAnimalService {
         animal.setSpecies(animalDto.getSpecies());
         animal.setSex(animalDto.getSex());
         animal.setRace(animalDto.getRace());
-        animal.setBirthDate(animalDto.getBirthDate());
+        animal.setAge(animalDto.getAge());
         animal.setRescueDate(animalDto.getRescueDate());
         animal.setRescueLocation(animalDto.getRescueLocation());
         animal.setInitialDescription(animalDto.getInitialDescription());

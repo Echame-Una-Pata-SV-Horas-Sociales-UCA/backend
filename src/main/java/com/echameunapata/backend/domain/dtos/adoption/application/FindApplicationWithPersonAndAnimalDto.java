@@ -4,28 +4,14 @@ import com.echameunapata.backend.domain.dtos.adoption.application.visit.FindVisi
 import com.echameunapata.backend.domain.dtos.animal.FindAnimalDto;
 import com.echameunapata.backend.domain.dtos.person.PersonDto;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class FindApplicationWithPersonAndAnimalDto {
-    private UUID id;
+public class FindApplicationWithPersonAndAnimalDto extends FindApplicationDto {
 
-    private Instant applicationDate;
-    private String status;
-    private Boolean ownHome;
-    private Boolean acceptsVisits;
-    private String veterinarianName;
-    private String veterinarianPhone;
-    private Boolean commitmentToSterilization;
-    private Boolean commitmentToSendPhotos;
-
-    private String observations;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
     private PersonDto person;
 
     private FindAnimalDto animal;

@@ -23,8 +23,7 @@ public class RegisterAnimalDto {
 
     private AnimalSex sex;
     private String race;
-//cambiar por edad del animal
-    private LocalDate birthDate;
+    private String age;
 
     private LocalDate rescueDate;
     @NotEmpty(message = "Rescue location  cannot be empty")

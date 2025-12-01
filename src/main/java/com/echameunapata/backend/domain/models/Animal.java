@@ -32,7 +32,7 @@ public class Animal {
     @Enumerated(EnumType.STRING)
     private AnimalSex sex;
     private String race;
-    private LocalDate birthDate;
+    private String age;
 
     @Enumerated(EnumType.STRING)
     private AnimalState state = AnimalState.AVAILABLE;
