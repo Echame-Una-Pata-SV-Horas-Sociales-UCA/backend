@@ -106,10 +106,14 @@ public class WebSecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // En desarrollo se puede usar "*", en producción poner el dominio específico
-        configuration.setAllowedOrigins(List.of("*"));
+
+        // CORRECCIÓN PRINCIPAL:
+        // En lugar de setAllowedOrigins(""), usamos setAllowedOriginPatterns("")
+        // Esto permite credenciales Y acepta cualquier origen dinámicamente.
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
