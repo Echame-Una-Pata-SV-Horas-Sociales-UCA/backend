@@ -101,10 +101,21 @@ public class ReportServiceImpl implements IReportService {
     public Report updateStatusReport(UpdateStatusReportDto reportDto) {
         try{
             var report = reportRepository.findById(reportDto.getReportId()).orElse(null);
+
             if (report == null){
                 throw new HttpError(HttpStatus.FOUND, "Report with id not exists");
             }
+
             ReportStatus newStatus = ReportStatus.fromString(reportDto.getStatus());
+
+            if(!newStatus.name().equalsIgnoreCase(reportDto.getStatus())){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "The status value is not valid. Allowed values are: OPEN, CLOSED");
+            }
+
+            if (newStatus.name().equals(report.getStatus().toString())){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "The report already has the status: " + reportDto.getStatus());
+            }
+
             report.setStatus(newStatus);
 
             report = reportRepository.save(report);
@@ -146,8 +157,12 @@ public class ReportServiceImpl implements IReportService {
     @Override
     public List<Report> findAllReportsByFilters(String type, String status, Instant startDate, Instant endDate) {
         try{
-            ReportType reportType = (type != null && !type.isBlank()) ? ReportType.fromString(type) : null;
+            ReportType reportType = (type == null || (type != null && type.isBlank())) ? null : ReportType.fromString(type);
             ReportStatus reportStatus = (status != null && !status.isBlank()) ? ReportStatus.fromString(status) : null;
+
+            System.out.println("Repot type: " + reportType);
+            System.out.println("Report status: " + reportStatus);
+
             List<Report> reports = reportRepository.findByFilters(reportType, reportStatus, startDate, endDate);
 
             if (reports.isEmpty()){
