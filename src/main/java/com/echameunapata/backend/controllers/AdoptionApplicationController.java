@@ -5,21 +5,19 @@ import com.echameunapata.backend.domain.dtos.adoption.application.FindApplicatio
 import com.echameunapata.backend.domain.dtos.adoption.application.FindApplicationWithPersonAndAnimalDto;
 import com.echameunapata.backend.domain.dtos.adoption.application.UpdateStatusInApplicationDto;
 import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
-import com.echameunapata.backend.domain.dtos.commons.PageResponse;
 import com.echameunapata.backend.domain.models.AdoptionApplication;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.services.contract.IAdoptionApplicationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -46,22 +44,13 @@ public class AdoptionApplicationController {
     public ResponseEntity<GeneralResponse>findAllApplications(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate,
-            Pageable pageable
-    ){
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate){
         try{
-            Page<AdoptionApplication> applications = adoptionApplicationService.findAllApplications(status, startDate, endDate, pageable);
-            Page<FindApplicationDto> dtoPage = applications.map(application -> modelMapper.map(application, FindApplicationDto.class));
+            List<AdoptionApplication> applications = adoptionApplicationService.findAllApplications(status, startDate, endDate);
+            List<FindApplicationDto> dtoPage = applications.stream().map(application -> modelMapper.map(application, FindApplicationDto.class)).toList();
 
-            PageResponse<FindApplicationDto> response = new PageResponse<>(
-                    dtoPage.getContent(),
-                    dtoPage.getNumber(),
-                    dtoPage.getSize(),
-                    dtoPage.getTotalElements(),
-                    dtoPage.getTotalPages()
-            );
 
-            return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", response);
+            return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", dtoPage);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
         }

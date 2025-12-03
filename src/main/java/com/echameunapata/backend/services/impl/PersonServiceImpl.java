@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -50,14 +51,13 @@ public class PersonServiceImpl  implements IPersonService {
     /**
      * Este método permite traer todos los registro de personas creados
      *
-     * @param pageable informacion sobre la cantidad de datos a cargar.
      * @return La lista de personas encontradas.
      * @throws HttpError Error inesperado en el proceso.
      */
     @Override
-    public Page<Person> findAllPerson(Pageable pageable) {
+    public List<Person> findAllPerson() {
         try{
-            Page<Person> person = personRepository.findAll(pageable);
+            List<Person> person = personRepository.findAll();
 
             return person;
         }catch (Exception e){

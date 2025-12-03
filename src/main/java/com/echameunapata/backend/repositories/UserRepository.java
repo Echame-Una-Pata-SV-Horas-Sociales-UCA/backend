@@ -24,5 +24,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             WHERE (:roles IS NULL OR r.id IN :roles)
             AND (:isActive IS NULL OR u.IsActive = :isActive)
     """)
-    Page<User> findByFilters(@Param("roles")List<String>roles, @Param("isActive")Boolean isActive, Pageable pageable);
+    List<User> findByFilters(@Param("roles")List<String>roles, @Param("isActive")Boolean isActive, Pageable pageable);
 }

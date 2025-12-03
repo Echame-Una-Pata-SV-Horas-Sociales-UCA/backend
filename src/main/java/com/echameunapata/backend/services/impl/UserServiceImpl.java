@@ -57,9 +57,9 @@ public class UserServiceImpl implements IUserService {
      * @throws HttpError Si no hay usuarios con esas caracteristicas.
      */
     @Override
-    public Page<User> findAllUsersByRoleAndIsActive(List<String>idsRoles, Boolean isActive, Pageable pageable) {
+    public List<User> findAllUsersByRoleAndIsActive(List<String>idsRoles, Boolean isActive, Pageable pageable) {
         try{
-            Page<User> users = userRepository.findByFilters(idsRoles, isActive, pageable);
+            List<User> users = userRepository.findByFilters(idsRoles, isActive, pageable);
             if (users.isEmpty()){
                 throw new HttpError(HttpStatus.NOT_FOUND, "List users is empty");
             }

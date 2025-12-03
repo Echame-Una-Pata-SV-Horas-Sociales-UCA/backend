@@ -26,11 +26,11 @@ public class Sponsorship {
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Sponsorship status cannot be null")
-    private SponsorshipStatus sponsorshipStatus;
+    private SponsorshipStatus sponsorshipStatus = SponsorshipStatus.ACTIVE;
 
-    private Date startDate;
+    private String startDate;
 
-    private Date endDate;
+    private String endDate;
     @Column(columnDefinition = "TEXT")
     private String notes;
 

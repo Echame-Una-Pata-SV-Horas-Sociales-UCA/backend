@@ -3,8 +3,6 @@ package com.echameunapata.backend.repositories;
 import com.echameunapata.backend.domain.enums.reports.ReportStatus;
 import com.echameunapata.backend.domain.enums.reports.ReportType;
 import com.echameunapata.backend.domain.models.Report;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,12 +23,11 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
           AND (COALESCE(:startDate, r.receptionDate) <= r.receptionDate)
           AND (COALESCE(:endDate, r.receptionDate) >= r.receptionDate)
     """)
-    Page<Report> findByFilters(
+    List<Report> findByFilters(
             @Param("type")ReportType type,
             @Param("status")ReportStatus status,
             @Param("startDate") Instant startDate,
-            @Param("endDate") Instant endDate,
-            Pageable pageable
+            @Param("endDate") Instant endDate
     );
 
     @EntityGraph(attributePaths = {"person", "reportEvidences"})

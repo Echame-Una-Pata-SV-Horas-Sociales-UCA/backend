@@ -2,12 +2,11 @@ package com.echameunapata.backend.repositories;
 
 import com.echameunapata.backend.domain.models.Adoption;
 import lombok.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,7 +16,7 @@ public interface AdoptionRepository extends JpaRepository<Adoption, UUID> {
 
     @EntityGraph(attributePaths = {"adopter", "animal", "adoptionApplication"})
     @NonNull
-    Page<Adoption>findAll(@NonNull Pageable pageable);
+    List<Adoption> findAll();
 
     @EntityGraph(attributePaths = {"adopter", "animal", "animal.photos", "adoptionApplication"})
     @NonNull

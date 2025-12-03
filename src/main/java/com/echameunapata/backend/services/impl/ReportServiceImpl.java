@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -190,15 +191,14 @@ public class ReportServiceImpl implements IReportService {
      * @param status el tipo de status a buscar.
      * @param startDate fecha de inicio para filtrar.
      * @param endDate fecha de fin para filtrar.
-     * @param pageable informacion de pagina y cantidad de reportes a traer.
      * @throws HttpError Error inesperado en el proceso.
      */
     @Override
-    public Page<Report> findAllReportsByFilters(String type, String status, Instant startDate, Instant endDate, Pageable pageable) {
+    public List<Report> findAllReportsByFilters(String type, String status, Instant startDate, Instant endDate) {
         try{
             ReportType reportType = (type != null && !type.isBlank()) ? ReportType.fromString(type) : null;
             ReportStatus reportStatus = (status != null && !status.isBlank()) ? ReportStatus.fromString(status) : null;
-            Page<Report>reports = reportRepository.findByFilters(reportType, reportStatus, startDate, endDate, pageable);
+            List<Report> reports = reportRepository.findByFilters(reportType, reportStatus, startDate, endDate);
 
             if (reports.isEmpty()){
                 throw new HttpError(HttpStatus.NOT_FOUND, "No reports found for the given filters");

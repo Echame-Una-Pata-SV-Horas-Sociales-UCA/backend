@@ -16,12 +16,11 @@ import com.echameunapata.backend.services.contract.IAnimalService;
 import com.echameunapata.backend.services.contract.IPersonService;
 import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -100,15 +99,14 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
      * @param status estado de la solicitud (opcional).
      * @param startDate fecha inicial del rango de búsqueda (opcional).
      * @param endDate fecha final del rango de búsqueda (opcional).
-     * @param pageable información de paginación.
      * @return Página con las solicitudes de adopción encontradas.
      * @throws HttpError Si ocurre algún error durante la consulta.
      */
     @Override
-    public Page<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate, Pageable pageable) {
+    public List<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate) {
         try{
             AdoptionStatus adoptionStatus = (status != null && !status.isBlank()) ? AdoptionStatus.fromString(status) : null;
-            Page<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate,true, pageable );
+            List<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate,true );
 
             return applications;
         }catch (HttpError e){

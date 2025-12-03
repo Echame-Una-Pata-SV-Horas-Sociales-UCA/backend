@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface IUserService {
     User findUserByEmail(String email);
-    Page<User> findAllUsersByRoleAndIsActive(List<String>idsRoles, Boolean isActive, Pageable pageable);
+    List<User> findAllUsersByRoleAndIsActive(List<String>idsRoles, Boolean isActive, Pageable pageable);
     User findUserById(UUID id);
     User updateUserInfo(UUID userId, UpdateUserInfoDto userInfoDto);
     void updateIsActive(UUID id);
