@@ -13,9 +13,11 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -44,8 +46,8 @@ public class ReportController {
      *
      * @throws HttpError Si ocurre un error de validación o si el proceso falla.
      */
-    @PostMapping("/create")
-    public ResponseEntity<GeneralResponse>createNewReport(@RequestBody @Valid CreateReportDto reportDto){
+    @PostMapping(value = "/create" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GeneralResponse>createNewReport(@ModelAttribute @Valid CreateReportDto reportDto){
         try{
             Report report = reportService.createReport(reportDto);
             FindReportDto resp = modelMapper.map(report, FindReportDto.class);
@@ -53,12 +55,13 @@ public class ReportController {
             return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", resp);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     /**
      * Obtiene una lista paginada de reportes aplicando filtros opcionales.
-     *
      * Este método permite buscar reportes filtrando por tipo, estado y rango de fechas.
      * Si no se proporcionan filtros, retorna todos los reportes existentes.
      *
@@ -111,7 +114,7 @@ public class ReportController {
     public ResponseEntity<GeneralResponse>findById(@PathVariable("id") UUID id){
         try {
             Report report = reportService.findReportById(id);
-            FindReportAndEvidencesDto resp = modelMapper.map(report, FindReportAndEvidencesDto.class);
+            FindReportDto resp = modelMapper.map(report, FindReportDto.class);
 
             return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", resp);
         }catch (HttpError e){

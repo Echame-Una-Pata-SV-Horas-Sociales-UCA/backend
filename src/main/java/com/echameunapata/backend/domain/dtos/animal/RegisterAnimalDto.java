@@ -36,5 +36,5 @@ public class RegisterAnimalDto {
     @Column(columnDefinition = "TEXT")
     private String observations;
 
-    private List<MultipartFile> photos;
+    private MultipartFile photo;
 }

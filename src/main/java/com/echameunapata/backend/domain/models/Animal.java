@@ -50,8 +50,7 @@ public class Animal {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<AnimalPhoto>photos = new ArrayList<>();
+    private String photo;
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
     private List<AdoptionApplication> adoptionApplications;

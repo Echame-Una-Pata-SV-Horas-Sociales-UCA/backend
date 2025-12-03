@@ -47,12 +47,11 @@ public class Report {
     @JoinColumn(name = "user_id")
     private Person person;
 
-    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
-    private List<ReportEvidence>reportEvidences;
+    private String photo;
 
     @PrePersist
     public void prePersist(){
-        this.status = ReportStatus.PENDING;
+        this.status = ReportStatus.OPEN;
         this.receptionDate = Instant.now();
     }
 

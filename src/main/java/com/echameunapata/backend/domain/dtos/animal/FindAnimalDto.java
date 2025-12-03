@@ -16,4 +16,5 @@ public class FindAnimalDto {
     private String sex;
     private String race;
     private String age;
+    private String photo;
 }

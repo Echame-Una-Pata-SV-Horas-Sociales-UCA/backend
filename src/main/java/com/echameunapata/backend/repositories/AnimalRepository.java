@@ -21,7 +21,6 @@ public interface AnimalRepository extends JpaRepository<Animal, UUID> {
     Animal findByName(String name);
     List<Animal>findAllByState(AnimalState state);
 
-    @EntityGraph(attributePaths = {"photos"})
     @Query("""
         SELECT a FROM Animal a
         WHERE (:sex IS NULL OR a.sex = :sex)
@@ -31,8 +30,4 @@ public interface AnimalRepository extends JpaRepository<Animal, UUID> {
             @Param("sex") AnimalSex sex,
             @Param("state") AnimalState state
     );
-
-    @EntityGraph(attributePaths = {"photos"})
-    @NonNull
-    Optional<Animal>findById( @NonNull UUID id);
 }

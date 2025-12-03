@@ -44,7 +44,7 @@ public class AnimalServiceImpl implements IAnimalService {
      * @throws HttpError Si el nombre ya está en uso u ocurre un error inesperado.
      */
     @Override
-    public Animal registerAnimal(RegisterAnimalDto animalDto) {
+    public Animal registerAnimal(RegisterAnimalDto animalDto) throws IOException {
         try{
 
             if(animalRepository.findByName(animalDto.getName()) != null){
@@ -53,12 +53,12 @@ public class AnimalServiceImpl implements IAnimalService {
 
             Animal animal = getAnimal(animalDto);
 
-            Animal saveAnimal = animalRepository.save(animal);
+            String photo = fileStorageService.uploadFile(animalDto.getPhoto(), "animals/" + animal.getName());
+            animal.setPhoto(photo);
 
-            savePhotos(animalDto.getPhotos(), saveAnimal);
 
-            return saveAnimal;
-        }catch (Exception e){
+            return animalRepository.save(animal);
+        }catch (HttpError e){
             throw e;
         }
     }
@@ -78,34 +78,6 @@ public class AnimalServiceImpl implements IAnimalService {
         return animal;
     }
 
-
-    private void savePhotos(List<MultipartFile> images, Animal animal){
-        try{
-            if(images.isEmpty()){
-                return;
-            }
-
-            for (MultipartFile image: images){
-                Map<String, Object> dataImage = fileStorageService.uploadFile(image, "animals/" + animal.getName());
-                AnimalPhoto photo = new AnimalPhoto();
-
-                photo.setUrl((String) dataImage.get("url"));
-
-                photo.setAnimal(animal);
-                photo.setProvider("Cloudinary");
-                photo.setProviderPublicId((String) dataImage.get("public_id"));
-                photo.setSecureUrl((String) dataImage.get("secure_url"));
-                photo.setContentType((String) dataImage.get("resource_type"));
-                photo.setSizeBytes(
-                        Long.parseLong(dataImage.get("bytes").toString())
-                );
-
-                animalPhotoRepository.save(photo);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Actualiza la información de un animal existente.

@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +35,8 @@ public class AnimalController {
             return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", resp);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -43,7 +46,7 @@ public class AnimalController {
             @RequestParam(required = false) String state){
         try{
             List<Animal> animals = animalService.findAllAnimals(state, sex);
-            List<FindAnimalWithPhotosDto> dtoPage = animals.stream().map(application -> modelMapper.map(application, FindAnimalWithPhotosDto.class)).toList();
+            List<FindAnimalDto> dtoPage = animals.stream().map(application -> modelMapper.map(application, FindAnimalDto.class)).toList();
 
 
             return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", dtoPage);
@@ -56,7 +59,7 @@ public class AnimalController {
     public ResponseEntity<GeneralResponse>findAnimalById(@PathVariable("id")UUID id){
         try{
             Animal animal = animalService.findById(id);
-            FindAnimalWithPhotosDto resp = modelMapper.map(animal, FindAnimalWithPhotosDto.class);
+            FindAnimalDto resp = modelMapper.map(animal, FindAnimalDto.class);
 
             return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", resp);
         }catch (HttpError e){

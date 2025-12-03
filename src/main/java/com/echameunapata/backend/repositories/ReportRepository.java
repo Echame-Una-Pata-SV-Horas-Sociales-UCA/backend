@@ -17,20 +17,24 @@ import java.util.UUID;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, UUID> {
     @Query("""
-        SELECT r FROM Report r
-        WHERE (:type IS NULL OR r.type = :type)
-          AND (:status IS NULL OR r.status = :status)
-          AND (COALESCE(:startDate, r.receptionDate) <= r.receptionDate)
-          AND (COALESCE(:endDate, r.receptionDate) >= r.receptionDate)
-    """)
+    SELECT r FROM Report r
+    WHERE (:type IS NULL OR r.type = :type)
+      AND (:status IS NULL OR r.status = :status)
+      AND (COALESCE(:startDate, r.receptionDate) <= r.receptionDate)
+      AND (COALESCE(:endDate, r.receptionDate) >= r.receptionDate)
+    ORDER BY 
+        CASE WHEN r.status = 'OPEN' THEN 0 ELSE 1 END,
+        r.receptionDate DESC
+""")
     List<Report> findByFilters(
-            @Param("type")ReportType type,
-            @Param("status")ReportStatus status,
+            @Param("type") ReportType type,
+            @Param("status") ReportStatus status,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate
     );
 
-    @EntityGraph(attributePaths = {"person", "reportEvidences"})
+
+    @EntityGraph(attributePaths = {"person"})
     @Query("SELECT r FROM Report r WHERE r.id = :id")
     Optional<Report> findByIdWithEvidence(@Param("id") UUID id);
 

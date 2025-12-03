@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class ReportServiceImpl implements IReportService {
 
     private final ReportRepository reportRepository;
     private final PersonServiceImpl personService;
+    private final FileStorageServiceImpl fileStorageService;
     private final NotificationFactory notificationFactory;
 
     /**
@@ -39,7 +41,7 @@ public class ReportServiceImpl implements IReportService {
      * @throws HttpError Error inesperado en el proceso.
      */
     @Override
-    public Report createReport(CreateReportDto reportDto) {
+    public Report createReport(CreateReportDto reportDto) throws IOException {
         try{
             Report report = new Report();
             ReportType reportType = ReportType.fromString(reportDto.getType());
@@ -51,8 +53,9 @@ public class ReportServiceImpl implements IReportService {
             report.setIsAnonymous(reportDto.getIsAnonymous());
             report.setContactPhone(reportDto.getContactPhone());
             report.setContactEmail(reportDto.getContactEmail());
-            report.setReportEvidences(new ArrayList<>());
+            String photo  = fileStorageService.uploadFile(reportDto.getPhoto(), "reports/evidences");
 
+            report.setPhoto(photo);
             if(!reportDto.getIsAnonymous()){
                 Person person =personService.createPerson(reportDto.getPerson());
                 report.setPerson(person);
@@ -102,7 +105,6 @@ public class ReportServiceImpl implements IReportService {
                 throw new HttpError(HttpStatus.FOUND, "Report with id not exists");
             }
             ReportStatus newStatus = ReportStatus.fromString(reportDto.getStatus());
-            validStatusTransition(report.getStatus(), newStatus);
             report.setStatus(newStatus);
 
             report = reportRepository.save(report);
@@ -113,58 +115,6 @@ public class ReportServiceImpl implements IReportService {
         }catch (Exception e){
             throw e;
         }
-    }
-
-    private void validStatusTransition(ReportStatus oldStatus, ReportStatus newStatus){
-
-        // Estados finales → no permitir cambios
-        if (oldStatus == ReportStatus.RESOLVED ||
-                oldStatus == ReportStatus.REJECTED ||
-                oldStatus == ReportStatus.DISCARDED) {
-
-            throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "No se puede cambiar el estado de un reporte cerrado");
-        }
-
-        // No permitir regresión
-        if (oldStatus == ReportStatus.IN_PROGRESS && newStatus == ReportStatus.PENDING) {
-            throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "No se puede regresar un reporte en progreso a pendiente");
-        }
-
-        // No permitir cerrar directamente desde PENDING
-        if (oldStatus == ReportStatus.PENDING &&
-                (newStatus == ReportStatus.RESOLVED)) {
-
-            throw new HttpError(HttpStatus.BAD_REQUEST,
-                    "No se puede resolver un reporte que no ha iniciado");
-        }
-
-    }
-
-    /**
-     * Este método permite buscar un reporte por su id y actualizar su informacion
-     *
-     * @param id codigo unico de identificacion par aun reporte
-     * @param reportInfoDto nueva informacion a asignar
-     * @return El reporte actualizado.
-     * @throws HttpError Error inesperado en el proceso.
-     */
-    @Override
-    public Report updateReport(UUID id, UpdateReportInfoDto reportInfoDto) {
-       try{
-           var report = findReportById(id);
-           report.setType(reportInfoDto.getType());
-           report.setDescription(reportInfoDto.getDescription());
-           report.setLocation(reportInfoDto.getLocation());
-           report.setLocationUrl(reportInfoDto.getLocationUrl());
-           report.setContactPhone(reportInfoDto.getContactPhone());
-           report.setContactEmail(reportInfoDto.getContactEmail());
-
-           return reportRepository.save(report);
-       }catch (Exception e){
-           throw e;
-       }
     }
 
     /**
