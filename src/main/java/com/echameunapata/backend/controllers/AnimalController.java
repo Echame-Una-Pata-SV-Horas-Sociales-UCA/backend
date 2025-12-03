@@ -1,7 +1,6 @@
 package com.echameunapata.backend.controllers;
 
 import com.echameunapata.backend.domain.dtos.animal.FindAnimalDto;
-import com.echameunapata.backend.domain.dtos.animal.FindAnimalWithPhotosDto;
 import com.echameunapata.backend.domain.dtos.animal.RegisterAnimalDto;
 import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
 import com.echameunapata.backend.domain.models.Animal;
@@ -41,7 +40,7 @@ public class AnimalController {
     }
 
     @GetMapping("/find-all")
-    public ResponseEntity<GeneralResponse>findAllApplications(
+    public ResponseEntity<GeneralResponse> findAllAnimals(
             @RequestParam(required = false) String sex,
             @RequestParam(required = false) String state){
         try{
@@ -61,7 +60,7 @@ public class AnimalController {
             Animal animal = animalService.findById(id);
             FindAnimalDto resp = modelMapper.map(animal, FindAnimalDto.class);
 
-            return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", resp);
+            return GeneralResponse.getResponse(HttpStatus.OK, "Success", resp);
         }catch (HttpError e){
             throw e;
         }
