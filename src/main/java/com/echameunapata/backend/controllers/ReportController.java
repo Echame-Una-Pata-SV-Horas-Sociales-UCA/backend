@@ -1,7 +1,6 @@
 package com.echameunapata.backend.controllers;
 
 import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
-import com.echameunapata.backend.domain.dtos.commons.PageResponse;
 import com.echameunapata.backend.domain.dtos.reports.CreateReportDto;
 import com.echameunapata.backend.domain.dtos.reports.FindReportAndEvidencesDto;
 import com.echameunapata.backend.domain.dtos.reports.FindReportDto;
@@ -12,14 +11,13 @@ import com.echameunapata.backend.services.contract.IReportService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -68,7 +66,6 @@ public class ReportController {
      * @param status     Filtro opcional por estado del reporte. Puede ser null.
      * @param startDate  Fecha inicial del rango de búsqueda (ISO_DATE_TIME). Opcional.
      * @param endDate    Fecha final del rango de búsqueda (ISO_DATE_TIME). Opcional.
-     * @param pageable   Parámetros de paginación como página, tamaño y ordenamiento.
      *
      * @return ResponseEntity con un GeneralResponse que contiene:
      *         - listado paginado de reportes (PageResponse)
@@ -82,22 +79,13 @@ public class ReportController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate,
-            Pageable pageable
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate
     ){
         try {
-            Page<Report> reports = reportService.findAllReportsByFilters(type, status, startDate, endDate, pageable);
-            Page<FindReportDto> dtoPage = reports.map(report -> modelMapper.map(report, FindReportDto.class));
+            List<Report> reports = reportService.findAllReportsByFilters(type, status, startDate, endDate);
+            List<FindReportDto> dtoPage = reports.stream().map(report -> modelMapper.map(report, FindReportDto.class)).toList();
 
-            PageResponse<FindReportDto> response = new PageResponse<>(
-                    dtoPage.getContent(),
-                    dtoPage.getNumber(),
-                    dtoPage.getSize(),
-                    dtoPage.getTotalElements(),
-                    dtoPage.getTotalPages()
-            );
-
-            return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", response);
+            return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", dtoPage);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
         }

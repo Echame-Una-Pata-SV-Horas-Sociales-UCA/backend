@@ -7,11 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public interface IAdoptionApplicationService {
     AdoptionApplication createApplication(CreateApplicationDto applicationDto);
-    Page<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate, Pageable pageable);
+    List<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate);
     AdoptionApplication findApplicationById(UUID id);
     AdoptionApplication updateStatusAndDescription(UpdateStatusInApplicationDto applicationDto);
 

@@ -11,6 +11,7 @@ public class FindAnimalDto {
     private UUID id;
     private String name;
     private String species;
+    private String state;
 
     private String sex;
     private String race;

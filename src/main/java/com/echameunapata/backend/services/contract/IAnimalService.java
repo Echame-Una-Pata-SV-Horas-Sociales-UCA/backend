@@ -8,12 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
+import java.util.List;
 import java.util.UUID;
 
 public interface IAnimalService {
     Animal registerAnimal(RegisterAnimalDto animalDto);
     void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto);
-    Page<Animal> findAllAnimals(String stateString, String sexString, Pageable pageable);
+    List<Animal> findAllAnimals(String stateString, String sexString);
     Animal findById(UUID animalId);
     Animal findByName(String name);
     void updateAnimalStatus(UUID animalId, AnimalState status);

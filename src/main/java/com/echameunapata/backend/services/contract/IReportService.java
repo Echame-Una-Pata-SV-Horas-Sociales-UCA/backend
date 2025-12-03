@@ -4,8 +4,6 @@ import com.echameunapata.backend.domain.dtos.reports.CreateReportDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateReportInfoDto;
 import com.echameunapata.backend.domain.dtos.reports.UpdateStatusReportDto;
 import com.echameunapata.backend.domain.models.Report;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,5 +15,5 @@ public interface IReportService {
     Report updateStatusReport(UpdateStatusReportDto reportDto);
     Report updateReport(UUID id, UpdateReportInfoDto reportInfoDto);
     void deleteOneReport(UUID id);
-    Page<Report>findAllReportsByFilters(String type, String status, Instant startDate, Instant endDate, Pageable pageable);
+    List<Report>findAllReportsByFilters(String type, String status, Instant startDate, Instant endDate);
 }

@@ -13,7 +13,6 @@ import com.echameunapata.backend.repositories.AnimalRepository;
 import com.echameunapata.backend.services.contract.IAnimalService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -140,17 +139,16 @@ public class AnimalServiceImpl implements IAnimalService {
      * Si se envía un estado válido, se filtra por dicho estado.
      *
      * @param stateString estado del animal en texto (opcional).
-     * @param pageable información de paginación.
      * @return Página con la lista de animales encontrados.
      * @throws HttpError Si ocurre un error inesperado durante la consulta.
      */
     @Override
-    public Page<Animal> findAllAnimals(String stateString, String sexString, Pageable pageable) {
+    public List<Animal> findAllAnimals(String stateString, String sexString) {
         try{
             AnimalSex animalSex = (sexString != null && !sexString.isBlank()) ? AnimalSex.fromString(sexString) : null;
             AnimalState animalState = (stateString != null && !stateString.isBlank()) ? AnimalState.fromString(stateString) : null;
 
-            Page <Animal> animals= animalRepository.findAllByFilters(animalSex, animalState, pageable);
+            List <Animal> animals= animalRepository.findAllByFilters(animalSex, animalState);
             return animals;
         }catch (Exception e){
             throw e;
