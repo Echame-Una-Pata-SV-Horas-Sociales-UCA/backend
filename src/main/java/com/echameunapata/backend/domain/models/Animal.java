@@ -35,13 +35,14 @@ public class Animal {
     private String age;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private AnimalState state = AnimalState.AVAILABLE;
     private LocalDate rescueDate;
     private String rescueLocation;
 
     @Column(columnDefinition = "TEXT")
     private String initialDescription;
-    private Boolean sterilized =false;
+    private Boolean sterilized = false;
     private Boolean missingLimb = false;
     @Column(columnDefinition = "TEXT")
     private String observations;
@@ -59,11 +60,11 @@ public class Animal {
     private Adoption adoption;
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
-    private List<HealthEvent>healthEvents= new ArrayList<>();
+    private List<HealthEvent> healthEvents = new ArrayList<>();
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY)
-    private List<Sponsorship>sponsorships= new ArrayList<>();
+    private List<Sponsorship> sponsorships = new ArrayList<>();
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<TemporaryHome>temporaryHomes = new ArrayList<>();
+    private List<TemporaryHome> temporaryHomes = new ArrayList<>();
 }
