@@ -69,6 +69,11 @@ dependencies {
 
 // Transport HTTP
 	implementation("com.google.http-client:google-http-client-apache-v2:1.43.3")
+
+    // https://mvnrepository.com/artifact/org.flywaydb/flyway-core
+    implementation("org.flywaydb:flyway-core:11.18.0")
+    // https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql
+    runtimeOnly("org.flywaydb:flyway-database-postgresql:11.18.0")
 }
 
 tasks.named('test') {
