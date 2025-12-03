@@ -97,12 +97,14 @@ application-*.yml
 # usa placeholders y evita credenciales reales.
 
 # --- Datos, dumps y respaldos ---
-*.sql
+#*.sql
 *.dump
 *.bak
 backups/
 backup/
 database/backup/
+data.sql
+!src/main/resources/db/migration/**/*.sql
 
 # --- Subidas locales y artefactos de almacenamiento ---
 uploads/
