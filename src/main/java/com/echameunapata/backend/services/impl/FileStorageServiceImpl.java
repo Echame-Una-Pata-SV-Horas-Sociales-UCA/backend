@@ -21,7 +21,7 @@ public class FileStorageServiceImpl implements IFileStorageService {
 
 
     @Override
-    public Map<String, Object> uploadFile(MultipartFile file, String folderName) throws IOException {
+    public String uploadFile(MultipartFile file, String folderName) throws IOException {
         // 'echameunapata' actúa como carpeta raíz para mantener orden en tu nube
         String fullPath = "echameunapata/" + folderName;
 
@@ -46,11 +46,14 @@ public class FileStorageServiceImpl implements IFileStorageService {
 
         // Se sube el archivo convirtiéndolo a bytes.
         // ObjectUtils.asMap permite pasar parámetros opcionales a la API de Cloudinary.
-        return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+            Map uploadFile = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                 "folder", fullPath,
                 "resource_type", "auto", // Detecta automáticamente si es imagen o video (útil para evidencias)
-                "transformation", transformation
-        ));
+                "transformation", transformation));
+
+            String publicId = (String) uploadFile.get("public_id");
+            return cloudinary.url().secure(true).generate(publicId);
+
     }
 
     @Override

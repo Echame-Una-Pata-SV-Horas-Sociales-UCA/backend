@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -44,7 +45,7 @@ public class AnimalServiceImpl implements IAnimalService {
      * @throws HttpError Si el nombre ya está en uso u ocurre un error inesperado.
      */
     @Override
-    public Animal registerAnimal(RegisterAnimalDto animalDto) {
+    public Animal registerAnimal(RegisterAnimalDto animalDto) throws IOException {
         try{
 
             if(animalRepository.findByName(animalDto.getName()) != null){
@@ -53,12 +54,11 @@ public class AnimalServiceImpl implements IAnimalService {
 
             Animal animal = getAnimal(animalDto);
 
-            Animal saveAnimal = animalRepository.save(animal);
+            String photo = fileStorageService.uploadFile(animalDto.getPhoto(), "animals/" + animal.getName());
+            animal.setPhoto(photo);
 
-            savePhotos(animalDto.getPhotos(), saveAnimal);
-
-            return saveAnimal;
-        }catch (Exception e){
+            return animalRepository.save(animal);
+        }catch (HttpError e){
             throw e;
         }
     }
@@ -73,39 +73,25 @@ public class AnimalServiceImpl implements IAnimalService {
         animal.setRescueDate(animalDto.getRescueDate());
         animal.setRescueLocation(animalDto.getRescueLocation());
         animal.setInitialDescription(animalDto.getInitialDescription());
-        animal.setMissingLimb(animalDto.getMissingLimb());
         animal.setObservations(animalDto.getObservations());
+
+        if (animalDto.getMissingLimb() == null) {
+            animal.setMissingLimb(false);
+        } else {
+            animal.setMissingLimb(animalDto.getMissingLimb());
+        }
+
+        animal.setState(animalDto.getState() != null ? animalDto.getState() : AnimalState.AVAILABLE);
+
+        if (animalDto.getSterilized() != null) {
+            animal.setSterilized(animalDto.getSterilized());
+        } else {
+            animal.setSterilized(false);
+        }
+
         return animal;
     }
 
-
-    private void savePhotos(List<MultipartFile> images, Animal animal){
-        try{
-            if(images.isEmpty()){
-                return;
-            }
-
-            for (MultipartFile image: images){
-                Map<String, Object> dataImage = fileStorageService.uploadFile(image, "animals/" + animal.getName());
-                AnimalPhoto photo = new AnimalPhoto();
-
-                photo.setUrl((String) dataImage.get("url"));
-
-                photo.setAnimal(animal);
-                photo.setProvider("Cloudinary");
-                photo.setProviderPublicId((String) dataImage.get("public_id"));
-                photo.setSecureUrl((String) dataImage.get("secure_url"));
-                photo.setContentType((String) dataImage.get("resource_type"));
-                photo.setSizeBytes(
-                        Long.parseLong(dataImage.get("bytes").toString())
-                );
-
-                animalPhotoRepository.save(photo);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Actualiza la información de un animal existente.
@@ -143,13 +129,22 @@ public class AnimalServiceImpl implements IAnimalService {
      * @throws HttpError Si ocurre un error inesperado durante la consulta.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Animal> findAllAnimals(String stateString, String sexString) {
         try{
-            AnimalSex animalSex = (sexString != null && !sexString.isBlank()) ? AnimalSex.fromString(sexString) : null;
+
+            AnimalSex animalSex;
+
+            // By default, when no value of sex is provided, Animal Sex will be UNKNOWN, but we want to search all when no sex is received here, so we set it to null
+            if(sexString == null || (sexString != null && sexString.isBlank())){
+                animalSex = null;
+            }else{
+                animalSex = AnimalSex.fromString(sexString);
+            }
+
             AnimalState animalState = (stateString != null && !stateString.isBlank()) ? AnimalState.fromString(stateString) : null;
 
-            List <Animal> animals= animalRepository.findAllByFilters(animalSex, animalState);
-            return animals;
+            return animalRepository.findAllByFilters(animalSex, animalState);
         }catch (Exception e){
             throw e;
         }

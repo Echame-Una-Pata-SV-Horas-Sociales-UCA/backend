@@ -1,11 +1,8 @@
 package com.echameunapata.backend.domain.enums.reports;
 
 public enum ReportStatus {
-    PENDING,
-    IN_PROGRESS,
-    RESOLVED,
-    REJECTED,
-    DISCARDED;
+    OPEN,
+    CLOSED;
 
     public static ReportStatus fromString(String statusString){
         for(ReportStatus status: ReportStatus.values()){
@@ -13,6 +10,6 @@ public enum ReportStatus {
                 return status;
             }
         }
-        return PENDING;
+        return OPEN;
     }
 }

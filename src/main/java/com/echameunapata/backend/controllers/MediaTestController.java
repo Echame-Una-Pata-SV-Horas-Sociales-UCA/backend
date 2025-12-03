@@ -24,30 +24,30 @@ public class MediaTestController {
         this.fileStorageService = fileStorageService;
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<GeneralResponse> uploadTest(@RequestParam("file") MultipartFile file) {
-        try {
-            // Probamos subir a una carpeta llamada "test"
-            Map<String, Object> response = fileStorageService.uploadFile(file, "test_uploads");
-
-            // Retornamos la respuesta completa de Cloudinary para que veas qué datos te devuelve
-            return GeneralResponse.getResponse(
-                    HttpStatus.OK,
-                    "Imagen subida correctamente",
-                    response
-            );
-        } catch (IOException e) {
-            return GeneralResponse.getResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al subir imagen: " + e.getMessage()
-            );
-        } catch (Exception e) {
-            return GeneralResponse.getResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error inesperado: " + e.getMessage()
-            );
-        }
-    }
+//    @PostMapping("/upload")
+//    public ResponseEntity<GeneralResponse> uploadTest(@RequestParam("file") MultipartFile file) {
+//        try {
+//            // Probamos subir a una carpeta llamada "test"
+//            Map<String, Object> response = fileStorageService.uploadFile(file, "test_uploads");
+//
+//            // Retornamos la respuesta completa de Cloudinary para que veas qué datos te devuelve
+//            return GeneralResponse.getResponse(
+//                    HttpStatus.OK,
+//                    "Imagen subida correctamente",
+//                    response
+//            );
+//        } catch (IOException e) {
+//            return GeneralResponse.getResponse(
+//                    HttpStatus.INTERNAL_SERVER_ERROR,
+//                    "Error al subir imagen: " + e.getMessage()
+//            );
+//        } catch (Exception e) {
+//            return GeneralResponse.getResponse(
+//                    HttpStatus.INTERNAL_SERVER_ERROR,
+//                    "Error inesperado: " + e.getMessage()
+//            );
+//        }
+//    }
 
     @DeleteMapping("/delete")
     public ResponseEntity<GeneralResponse> deleteTest(@RequestParam("publicId") String publicId) {

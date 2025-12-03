@@ -26,4 +26,5 @@ public class FindReportDto {
     private Timestamp updatedAt;
 
     private PersonDto person;
+    private String photo;
 }

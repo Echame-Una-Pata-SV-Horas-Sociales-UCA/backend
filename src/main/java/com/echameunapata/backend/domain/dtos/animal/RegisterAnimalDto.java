@@ -3,6 +3,7 @@ package com.echameunapata.backend.domain.dtos.animal;
 
 import com.echameunapata.backend.domain.enums.animals.AnimalSex;
 import com.echameunapata.backend.domain.enums.animals.AnimalSpecies;
+import com.echameunapata.backend.domain.enums.animals.AnimalState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -36,5 +37,12 @@ public class RegisterAnimalDto {
     @Column(columnDefinition = "TEXT")
     private String observations;
 
-    private List<MultipartFile> photos;
+    private MultipartFile photo;
+
+    // Add state with default to ensure a valid value is sent to DB
+    @NotNull(message = "State cannot be null")
+    private AnimalState state = AnimalState.AVAILABLE;
+
+    // Field for the sterilization state of the animal with a default value
+    private Boolean sterilized = false;
 }

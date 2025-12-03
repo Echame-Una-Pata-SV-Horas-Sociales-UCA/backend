@@ -8,11 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 public interface IAnimalService {
-    Animal registerAnimal(RegisterAnimalDto animalDto);
+    Animal registerAnimal(RegisterAnimalDto animalDto) throws IOException;
     void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto);
     List<Animal> findAllAnimals(String stateString, String sexString);
     Animal findById(UUID animalId);

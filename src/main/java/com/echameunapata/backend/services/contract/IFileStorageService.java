@@ -14,7 +14,7 @@ public interface IFileStorageService {
      * @return Un Mapa con la respuesta cruda del proveedor (url, public_id, etc.).
      * @throws IOException Si ocurre un error de entrada/salida durante la subida.
      */
-    Map<String, Object> uploadFile(MultipartFile file, String folderName) throws IOException;
+    String uploadFile(MultipartFile file, String folderName) throws IOException;
 
     /**
      * Elimina un archivo del proveedor de almacenamiento.
