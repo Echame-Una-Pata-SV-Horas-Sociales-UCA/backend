@@ -31,7 +31,7 @@ public interface AdoptionApplicationRepository extends JpaRepository<AdoptionApp
             @Param("isApplication") Boolean isApplication
     );
 
-    @EntityGraph(attributePaths = {"person", "animal", "adoptionVisits"})
+    @EntityGraph(attributePaths = {"person", "animal", "adoptionVisits", "adoptionReferences"})
     Optional<AdoptionApplication> findWithRelationsById(UUID id);
 
 }

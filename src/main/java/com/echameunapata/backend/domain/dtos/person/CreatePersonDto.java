@@ -18,10 +18,10 @@ public class CreatePersonDto {
     @Email(message = "Invalid format by email")
     private String email;
     private String phoneNumber;
-//    @NotEmpty(message = "DUI cannot be empty")
-//    @Pattern(regexp = "\\d{8}-\\d", message = "DUI must be in the format ########-#")
-//    private String dui;
-//    private String address;
-//    private String city;
+    @NotEmpty(message = "DUI cannot be empty")
+    @Pattern(regexp = "\\d{8}-\\d", message = "DUI must be in the format ########-#")
+    private String dui;
+    private String address;
+    private String city;
 
 }

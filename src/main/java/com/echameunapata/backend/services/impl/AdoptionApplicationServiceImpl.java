@@ -2,14 +2,17 @@ package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.dtos.adoption.application.CreateApplicationDto;
 import com.echameunapata.backend.domain.dtos.adoption.application.UpdateStatusInApplicationDto;
+import com.echameunapata.backend.domain.dtos.adoption.reference.CreateReferenceDto;
 import com.echameunapata.backend.domain.enums.adoptions.AdoptionStatus;
 import com.echameunapata.backend.domain.enums.animals.AnimalState;
 import com.echameunapata.backend.domain.enums.notifications.NotificationType;
 import com.echameunapata.backend.domain.models.AdoptionApplication;
+import com.echameunapata.backend.domain.models.AdoptionReference;
 import com.echameunapata.backend.domain.models.Animal;
 import com.echameunapata.backend.domain.models.Person;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.AdoptionApplicationRepository;
+import com.echameunapata.backend.repositories.ApplicationReferencesRepository;
 import com.echameunapata.backend.services.contract.IAdoptionApplicationService;
 import com.echameunapata.backend.services.contract.IAdoptionService;
 import com.echameunapata.backend.services.contract.IAnimalService;
@@ -31,6 +34,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     private final IAnimalService animalService;
     private final IPersonService personService;
     private final AdoptionApplicationRepository applicationRepository;
+    private final ApplicationReferencesRepository referencesRepository;
     private final NotificationFactory notificationFactory;
     private final IAdoptionService adoptionService;
 
@@ -61,11 +65,22 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
             var application = setApplicationData(applicationDto, animal, person, status);
             AdoptionApplication newApplication = applicationRepository.save(application);
 
+            saveAdoptionReferences(applicationDto.getReferences(), newApplication);
             processStatusChange(application);
 
             return newApplication;
         }catch (HttpError e){
             throw  e;
+        }
+    }
+
+    private void saveAdoptionReferences(List<CreateReferenceDto> referencesDto, AdoptionApplication application){
+        for (CreateReferenceDto r: referencesDto){
+            AdoptionReference reference = new AdoptionReference();
+            reference.setName(r.getName());
+            reference.setPhoneNumber(r.getPhoneNumber());
+            reference.setAdoptionApplication(application);
+            referencesRepository.save(reference);
         }
     }
 
