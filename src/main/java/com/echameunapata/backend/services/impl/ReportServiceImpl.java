@@ -61,11 +61,10 @@ public class ReportServiceImpl implements IReportService {
                 report.setPerson(person);
             }
 
-            var newReport = reportRepository.save(report);
-            notificationFactory.getStrategy(NotificationType.REPORT_CREATED)
-                    .sendNotification(newReport);
+//                        notificationFactory.getStrategy(NotificationType.REPORT_CREATED)
+//                    .sendNotification(newReport);
 
-            return newReport;
+            return reportRepository.save(report);
         }catch (Exception e){
             throw e;
         }
