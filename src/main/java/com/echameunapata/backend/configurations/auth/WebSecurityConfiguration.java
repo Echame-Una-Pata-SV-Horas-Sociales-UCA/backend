@@ -71,7 +71,8 @@ public class WebSecurityConfiguration {
             auth.requestMatchers(
                     apiBasePath + "/auth/**",
                     apiBasePath +"/reports/create",
-                    apiBasePath + "/evidence/create/**"
+                    apiBasePath + "/evidence/create/**",
+                    apiBasePath+ "/adoption/applications/create"
                     ).permitAll();
 
 //            // 2. Endpoints Públicos (Según SRS y diseño)
