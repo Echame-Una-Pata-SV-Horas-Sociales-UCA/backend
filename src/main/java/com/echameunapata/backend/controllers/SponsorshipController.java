@@ -30,7 +30,7 @@ public class SponsorshipController {
         try{
             var sponsorship = sponsorshipService.registerSponsorship(sponsorshipDto);
 
-            return GeneralResponse.getResponse(HttpStatus.CREATED, "Success");
+            return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", sponsorship);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
         }
