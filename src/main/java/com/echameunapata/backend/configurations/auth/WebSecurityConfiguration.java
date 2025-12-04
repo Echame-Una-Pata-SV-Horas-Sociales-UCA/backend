@@ -71,7 +71,8 @@ public class WebSecurityConfiguration {
             auth.requestMatchers(
                     apiBasePath + "/auth/**",
                     apiBasePath +"/reports/create",
-                    apiBasePath + "/evidence/create/**"
+                    apiBasePath + "/evidence/create/**",
+                    apiBasePath + "/animals/find-all"
                     ).permitAll();
 
 //            // 2. Endpoints Públicos (Según SRS y diseño)
@@ -84,6 +85,7 @@ public class WebSecurityConfiguration {
 //            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/reports").permitAll();
 //
 //            // 3. Resto de endpoints requieren autenticación
+            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/animal/find-all").permitAll();
             auth.anyRequest().authenticated();
         });
 
