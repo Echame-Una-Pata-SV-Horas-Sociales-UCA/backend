@@ -14,7 +14,7 @@ import com.echameunapata.backend.services.contract.IAdoptionApplicationService;
 import com.echameunapata.backend.services.contract.IAdoptionService;
 import com.echameunapata.backend.services.contract.IAnimalService;
 import com.echameunapata.backend.services.contract.IPersonService;
-import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
+//import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     private final IAnimalService animalService;
     private final IPersonService personService;
     private final AdoptionApplicationRepository applicationRepository;
-    private final NotificationFactory notificationFactory;
+//    private final NotificationFactory notificationFactory;
     private final IAdoptionService adoptionService;
 
     /**
@@ -226,26 +226,26 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
 
         adoptionService.createAdoption(application);
         animalService.updateAnimalStatus(application.getAnimal().getId(), AnimalState.ADOPTED);
-        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_APPROVED)
-                .sendNotification(application);
+//        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_APPROVED)
+//                .sendNotification(application);
     }
 
     private void handleRejected(AdoptionApplication application) {
 
         animalService.updateAnimalStatus(application.getAnimal().getId(), AnimalState.AVAILABLE);
-        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REJECTED)
-                .sendNotification(application);
+//        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REJECTED)
+//                .sendNotification(application);
     }
 
     private void handleCreate(AdoptionApplication application){
 
         animalService.updateAnimalStatus(application.getAnimal().getId(), AnimalState.UNDER_ADOPTION);
-        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REGISTERED)
-                .sendNotification(application);
+//        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_REGISTERED)
+//                .sendNotification(application);
     }
     private void handleInReview(AdoptionApplication application){
-        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_IN_REVIEW)
-                .sendNotification(application);
+//        notificationFactory.getStrategy(NotificationType.ADOPTION_APPLICATION_IN_REVIEW)
+//                .sendNotification(application);
     }
 
 
