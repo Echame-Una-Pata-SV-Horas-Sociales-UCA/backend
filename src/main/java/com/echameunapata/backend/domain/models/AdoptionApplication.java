@@ -56,10 +56,10 @@ public class AdoptionApplication {
     private Adoption adoption;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoptionApplication")
-    private List<AdoptionVisit> adoptionVisits;
+    private Set<AdoptionVisit> adoptionVisits;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "adoptionApplication")
-    private Set<AdoptionReference> adoptionReferences;
+    private List<AdoptionReference> adoptionReferences;
 
     @PrePersist
     public void prePersist(){
