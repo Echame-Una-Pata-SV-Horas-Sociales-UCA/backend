@@ -121,7 +121,7 @@ public class ReportController {
             Report report = reportService.findReportById(UUID.fromString(id));
             FindReportDto resp = modelMapper.map(report, FindReportDto.class);
 
-            return GeneralResponse.getResponse(HttpStatus.FOUND, "Report with given ID was found", resp);
+            return GeneralResponse.getResponse(HttpStatus.OK, "Report with given ID was found", resp);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
         }

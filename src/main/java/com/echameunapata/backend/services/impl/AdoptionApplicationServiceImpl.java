@@ -19,6 +19,7 @@ import com.echameunapata.backend.services.contract.IAnimalService;
 import com.echameunapata.backend.services.contract.IPersonService;
 //import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     private final AdoptionApplicationRepository applicationRepository;
 //    private final NotificationFactory notificationFactory;
     private final IAdoptionService adoptionService;
+    private final ApplicationReferencesRepository referencesRepository;
 
     /**
      * Crea una nueva solicitud de adopción.
