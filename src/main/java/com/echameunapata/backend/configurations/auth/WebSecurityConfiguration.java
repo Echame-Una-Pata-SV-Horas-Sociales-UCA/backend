@@ -85,6 +85,7 @@ public class WebSecurityConfiguration {
 //            auth.requestMatchers(HttpMethod.POST, apiBasePath + "/reports").permitAll();
 //
 //            // 3. Resto de endpoints requieren autenticación
+            auth.requestMatchers(HttpMethod.GET, apiBasePath + "/animal/find-all").permitAll();
             auth.anyRequest().authenticated();
         });
 

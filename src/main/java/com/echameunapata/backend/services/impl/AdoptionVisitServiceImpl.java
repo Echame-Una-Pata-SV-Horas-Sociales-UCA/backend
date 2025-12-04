@@ -11,7 +11,7 @@ import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.AdoptionVisitRepository;
 import com.echameunapata.backend.services.contract.IAdoptionApplicationService;
 import com.echameunapata.backend.services.contract.IAdoptionVisitService;
-import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
+//import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class AdoptionVisitServiceImpl implements IAdoptionVisitService {
 
     private final AdoptionVisitRepository adoptionVisitRepository;
     private final IAdoptionApplicationService applicationService;
-    private final NotificationFactory notificationFactory;
+//    private final NotificationFactory notificationFactory;
 
     @Override
     public void programingVisit(ProgramingVisitDto visitDto) {
@@ -49,8 +49,8 @@ public class AdoptionVisitServiceImpl implements IAdoptionVisitService {
 
              visit = adoptionVisitRepository.save(visit);
 
-            notificationFactory.getStrategy(NotificationType.ADOPTION_VISIT_SCHEDULED)
-                    .sendNotification(visit);
+//            notificationFactory.getStrategy(NotificationType.ADOPTION_VISIT_SCHEDULED)
+//                    .sendNotification(visit);
         }catch (HttpError e){
             throw e;
         }

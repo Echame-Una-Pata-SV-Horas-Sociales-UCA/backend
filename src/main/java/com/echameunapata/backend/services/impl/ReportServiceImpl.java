@@ -11,7 +11,7 @@ import com.echameunapata.backend.domain.models.Report;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.ReportRepository;
 import com.echameunapata.backend.services.contract.IReportService;
-import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
+//import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +31,7 @@ public class ReportServiceImpl implements IReportService {
     private final ReportRepository reportRepository;
     private final PersonServiceImpl personService;
     private final FileStorageServiceImpl fileStorageService;
-    private final NotificationFactory notificationFactory;
+//    private final NotificationFactory notificationFactory;
 
     /**
      * Este método permite crear un nuevo reporte
@@ -118,8 +118,8 @@ public class ReportServiceImpl implements IReportService {
             report.setStatus(newStatus);
 
             report = reportRepository.save(report);
-            notificationFactory.getStrategy(NotificationType.REPORT_STATUS_CHANGED)
-                    .sendNotification(report);
+//            notificationFactory.getStrategy(NotificationType.REPORT_STATUS_CHANGED)
+//                    .sendNotification(report);
 
            return report;
         }catch (Exception e){
