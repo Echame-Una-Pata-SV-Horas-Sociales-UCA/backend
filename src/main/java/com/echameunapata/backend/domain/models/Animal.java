@@ -67,4 +67,7 @@ public class Animal {
 
     @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TemporaryHome> temporaryHomes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "animal", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<AnimalPhoto> photos = new ArrayList<>();
 }
