@@ -11,7 +11,7 @@ import com.echameunapata.backend.domain.models.Report;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.repositories.ReportRepository;
 import com.echameunapata.backend.services.contract.IReportService;
-import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
+//import com.echameunapata.backend.services.notifications.factory.NotificationFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +31,7 @@ public class ReportServiceImpl implements IReportService {
     private final ReportRepository reportRepository;
     private final PersonServiceImpl personService;
     private final FileStorageServiceImpl fileStorageService;
-    private final NotificationFactory notificationFactory;
+//    private final NotificationFactory notificationFactory;
 
     /**
      * Este método permite crear un nuevo reporte
@@ -61,11 +61,10 @@ public class ReportServiceImpl implements IReportService {
                 report.setPerson(person);
             }
 
-            var newReport = reportRepository.save(report);
-            notificationFactory.getStrategy(NotificationType.REPORT_CREATED)
-                    .sendNotification(newReport);
+//                        notificationFactory.getStrategy(NotificationType.REPORT_CREATED)
+//                    .sendNotification(newReport);
 
-            return newReport;
+            return reportRepository.save(report);
         }catch (Exception e){
             throw e;
         }
@@ -101,15 +100,26 @@ public class ReportServiceImpl implements IReportService {
     public Report updateStatusReport(UpdateStatusReportDto reportDto) {
         try{
             var report = reportRepository.findById(reportDto.getReportId()).orElse(null);
+
             if (report == null){
                 throw new HttpError(HttpStatus.FOUND, "Report with id not exists");
             }
+
             ReportStatus newStatus = ReportStatus.fromString(reportDto.getStatus());
+
+            if(!newStatus.name().equalsIgnoreCase(reportDto.getStatus())){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "The status value is not valid. Allowed values are: OPEN, CLOSED");
+            }
+
+            if (newStatus.name().equals(report.getStatus().toString())){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "The report already has the status: " + reportDto.getStatus());
+            }
+
             report.setStatus(newStatus);
 
             report = reportRepository.save(report);
-            notificationFactory.getStrategy(NotificationType.REPORT_STATUS_CHANGED)
-                    .sendNotification(report);
+//            notificationFactory.getStrategy(NotificationType.REPORT_STATUS_CHANGED)
+//                    .sendNotification(report);
 
            return report;
         }catch (Exception e){
@@ -146,8 +156,12 @@ public class ReportServiceImpl implements IReportService {
     @Override
     public List<Report> findAllReportsByFilters(String type, String status, Instant startDate, Instant endDate) {
         try{
-            ReportType reportType = (type != null && !type.isBlank()) ? ReportType.fromString(type) : null;
+            ReportType reportType = (type == null || (type != null && type.isBlank())) ? null : ReportType.fromString(type);
             ReportStatus reportStatus = (status != null && !status.isBlank()) ? ReportStatus.fromString(status) : null;
+
+            System.out.println("Repot type: " + reportType);
+            System.out.println("Report status: " + reportStatus);
+
             List<Report> reports = reportRepository.findByFilters(reportType, reportStatus, startDate, endDate);
 
             if (reports.isEmpty()){

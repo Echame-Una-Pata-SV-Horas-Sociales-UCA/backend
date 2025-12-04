@@ -12,22 +12,19 @@ import org.springframework.stereotype.Repository;
 
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Repository
 public interface AnimalRepository extends JpaRepository<Animal, UUID> {
     Animal findByName(String name);
     List<Animal>findAllByState(AnimalState state);
 
-    @Query("""
-        SELECT a FROM Animal a
-        WHERE (:sex IS NULL OR a.sex = :sex)
-          AND (:state IS NULL OR a.state = :state)
-    """)
-    List<Animal> findAllByFilters(
-            @Param("sex") AnimalSex sex,
-            @Param("state") AnimalState state
-    );
+    @Query("SELECT a FROM Animal a WHERE " +
+            "(:sex IS NULL OR a.sex = :sex) AND " +
+            "(:state IS NULL OR a.state = :state)")
+    List<Animal> findAllByFilters(@Param("sex") AnimalSex sex, @Param("state") AnimalState state);
 }

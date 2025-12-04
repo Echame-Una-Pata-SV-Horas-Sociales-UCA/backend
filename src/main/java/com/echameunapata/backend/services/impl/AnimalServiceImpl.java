@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -56,7 +57,6 @@ public class AnimalServiceImpl implements IAnimalService {
             String photo = fileStorageService.uploadFile(animalDto.getPhoto(), "animals/" + animal.getName());
             animal.setPhoto(photo);
 
-
             return animalRepository.save(animal);
         }catch (HttpError e){
             throw e;
@@ -73,8 +73,22 @@ public class AnimalServiceImpl implements IAnimalService {
         animal.setRescueDate(animalDto.getRescueDate());
         animal.setRescueLocation(animalDto.getRescueLocation());
         animal.setInitialDescription(animalDto.getInitialDescription());
-        animal.setMissingLimb(animalDto.getMissingLimb());
         animal.setObservations(animalDto.getObservations());
+
+        if (animalDto.getMissingLimb() == null) {
+            animal.setMissingLimb(false);
+        } else {
+            animal.setMissingLimb(animalDto.getMissingLimb());
+        }
+
+        animal.setState(animalDto.getState() != null ? animalDto.getState() : AnimalState.AVAILABLE);
+
+        if (animalDto.getSterilized() != null) {
+            animal.setSterilized(animalDto.getSterilized());
+        } else {
+            animal.setSterilized(false);
+        }
+
         return animal;
     }
 
@@ -115,13 +129,22 @@ public class AnimalServiceImpl implements IAnimalService {
      * @throws HttpError Si ocurre un error inesperado durante la consulta.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Animal> findAllAnimals(String stateString, String sexString) {
         try{
-            AnimalSex animalSex = (sexString != null && !sexString.isBlank()) ? AnimalSex.fromString(sexString) : null;
+
+            AnimalSex animalSex;
+
+            // By default, when no value of sex is provided, Animal Sex will be UNKNOWN, but we want to search all when no sex is received here, so we set it to null
+            if(sexString == null || (sexString != null && sexString.isBlank())){
+                animalSex = null;
+            }else{
+                animalSex = AnimalSex.fromString(sexString);
+            }
+
             AnimalState animalState = (stateString != null && !stateString.isBlank()) ? AnimalState.fromString(stateString) : null;
 
-            List <Animal> animals= animalRepository.findAllByFilters(animalSex, animalState);
-            return animals;
+            return animalRepository.findAllByFilters(animalSex, animalState);
         }catch (Exception e){
             throw e;
         }

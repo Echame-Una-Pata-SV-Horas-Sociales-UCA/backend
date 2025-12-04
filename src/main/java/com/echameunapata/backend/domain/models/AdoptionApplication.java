@@ -64,5 +64,6 @@ public class AdoptionApplication {
     @PrePersist
     public void prePersist(){
         this.applicationDate =  Instant.now();
+        this.isApplication = true;
     }
 }

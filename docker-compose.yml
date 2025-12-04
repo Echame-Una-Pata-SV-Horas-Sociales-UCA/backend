@@ -1,12 +1,11 @@
 # docker-compose.yml
-version: "3.9"
 services:
   db:
     image: postgres:16
     environment:
       POSTGRES_USER: echame
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: echameunapata_db   # <- la crea sola
+      POSTGRES_DB: echameunapata_db
     ports:
       - "5432:5432"
     volumes:

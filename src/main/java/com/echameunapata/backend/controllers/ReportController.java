@@ -111,12 +111,17 @@ public class ReportController {
      * @throws HttpError Si el reporte no existe o no puede ser obtenido.
      */
     @GetMapping("/find-by-id/{id}")
-    public ResponseEntity<GeneralResponse>findById(@PathVariable("id") UUID id){
+    public ResponseEntity<GeneralResponse>findById(@PathVariable("id") String id){
         try {
-            Report report = reportService.findReportById(id);
+            // If the provided id is not a valid UUID, an exception will be thrown before reaching this point
+            if (UUID.fromString(id) == null){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "The provided id is not a valid UUID");
+            }
+
+            Report report = reportService.findReportById(UUID.fromString(id));
             FindReportDto resp = modelMapper.map(report, FindReportDto.class);
 
-            return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", resp);
+            return GeneralResponse.getResponse(HttpStatus.FOUND, "Report with given ID was found", resp);
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
         }
@@ -136,9 +141,13 @@ public class ReportController {
      * @throws HttpError Si el reporte no existe o no puede eliminarse.
      */
     @DeleteMapping("/delete-by-id/{id}")
-    public ResponseEntity<GeneralResponse>deleteById(@PathVariable("id")UUID id){
+    public ResponseEntity<GeneralResponse>deleteById(@PathVariable("id") String id){
         try {
-            reportService.deleteOneReport(id);
+            if (UUID.fromString(id) == null){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "The provided id is not a valid UUID");
+            }
+
+            reportService.deleteOneReport(UUID.fromString(id));
             return GeneralResponse.getResponse(HttpStatus.OK, "Report deleted is success");
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());

@@ -36,6 +36,7 @@ public class MailServiceImpl implements IMailService {
             mailSender.send(message);
 
         } catch (Exception e) {
+            System.out.println(e);
             throw new RuntimeException("Error enviando email", e);
         }
 
