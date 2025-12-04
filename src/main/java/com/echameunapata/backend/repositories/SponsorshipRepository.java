@@ -14,7 +14,7 @@ import java.util.UUID;
 @Repository
 public interface SponsorshipRepository extends JpaRepository<Sponsorship, UUID> {
 
-    long countBySponsorshipStatus(String status);
+    long countBySponsorshipStatus(SponsorshipStatus status);
 
     @EntityGraph(attributePaths = {"sponsor", "animal"})
     List<Sponsorship>findAllBySponsorshipStatus(SponsorshipStatus sponsorshipStatus);

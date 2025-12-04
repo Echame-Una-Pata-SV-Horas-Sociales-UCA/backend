@@ -1,6 +1,7 @@
 package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.enums.animals.AnimalState;
+import com.echameunapata.backend.domain.enums.sponsorship.SponsorshipStatus;
 import com.echameunapata.backend.repositories.AnimalRepository;
 import com.echameunapata.backend.repositories.SponsorshipRepository;
 import com.echameunapata.backend.services.contract.IDashboardService;
@@ -26,7 +27,7 @@ public class DashboardServiceImpl implements IDashboardService {
         AnimalRepository animalRepo;
         long perrosEnSantuario = animalRepository.countByState(AnimalState.AVAILABLE);
         long perrosAdoptados = animalRepository.countByAdoptionIsNotNull();
-        long padrinosGlobales = sponsorshipRepository.countBySponsorshipStatus("ACTIVE");
+        long padrinosGlobales = sponsorshipRepository.countBySponsorshipStatus(SponsorshipStatus.ACTIVE);
 
         List<Object[]> rescatesRaw = animalRepository.countRescuesByYear();
         Map<Integer, Integer> rescatesPorAno = rescatesRaw.stream()

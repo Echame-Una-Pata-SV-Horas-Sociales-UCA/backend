@@ -25,7 +25,7 @@ public class DashboardController {
 
             return GeneralResponse.getResponse(HttpStatus.CREATED, "Success programing visit", metrics);
         }catch (Exception e){
-            return GeneralResponse.getResponse(HttpStatus.OK, "Error in get dashboards");
+            return GeneralResponse.getResponse(HttpStatus.BAD_REQUEST, "Error in get dashboards"+e.getMessage());
         }
     }
 }
