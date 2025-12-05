@@ -72,7 +72,10 @@ public class SponsorshipServiceImpl implements ISponsorshipService {
         Sponsorship sponsorship = new Sponsorship();
         sponsorship.setMonthlyAmount(sponsorshipDto.getMonthlyAmount());
         sponsorship.setStartDate(sponsorshipDto.getStartDate());
-        sponsorship.setEndDate(sponsorshipDto.getEndDate());
+        // Always calculate endDate as startDate + 1 month
+        LocalDate start = LocalDate.parse(sponsorshipDto.getStartDate());
+        String endDate = start.plusMonths(1).toString();
+        sponsorship.setEndDate(endDate);
         sponsorship.setNotes(sponsorshipDto.getNotes());
         sponsorship.setSponsor(person);
         sponsorship.setAnimal(animal);
