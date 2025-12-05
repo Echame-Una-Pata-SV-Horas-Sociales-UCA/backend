@@ -29,7 +29,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    testImplementation 'org.springframework.security:spring-security-test'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -40,6 +41,34 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+	implementation("org.modelmapper:modelmapper:3.1.1")
+
+	//https://mapstruct.org/documentation/installation/
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    // https://mvnrepository.com/artifact/me.paulschwarz/spring-dotenv
+    implementation("me.paulschwarz:spring-dotenv:4.0.0")
+
+    // https://mvnrepository.com/artifact/com.cloudinary/cloudinary-core
+    implementation("com.cloudinary:cloudinary-core:2.3.2")
+
+    // https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http5
+    implementation("com.cloudinary:cloudinary-http5:2.3.2")
+
+	// https://mvnrepository.com/artifact/com.google.apis/google-api-services-calendar
+	implementation("com.google.apis:google-api-services-calendar:v3-rev20241101-2.0.0")
+
+	// https://mvnrepository.com/artifact/com.google.api-client/google-api-client
+	implementation("com.google.api-client:google-api-client:2.7.1")
+
+	// JSON Factory
+	implementation("com.google.http-client:google-http-client-jackson2:1.43.3")
+
+// Transport HTTP
+	implementation("com.google.http-client:google-http-client-apache-v2:1.43.3")
 }
 
 tasks.named('test') {
