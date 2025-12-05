@@ -4,6 +4,7 @@ import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
 import com.echameunapata.backend.domain.dtos.sponsorship.FindAllSponsorshipsDto;
 import com.echameunapata.backend.domain.dtos.sponsorship.FindSponsorshipDto;
 import com.echameunapata.backend.domain.dtos.sponsorship.RegisterSponsorshipDto;
+import com.echameunapata.backend.domain.dtos.sponsorship.RenewSponsorshipDto;
 import com.echameunapata.backend.domain.models.Sponsorship;
 import com.echameunapata.backend.exceptions.HttpError;
 import com.echameunapata.backend.services.contract.ISponsorshipService;
@@ -31,6 +32,17 @@ public class SponsorshipController {
             var sponsorship = sponsorshipService.registerSponsorship(sponsorshipDto);
             FindSponsorshipDto sponsorshipDtoResponse = modelMapper.map(sponsorship, FindSponsorshipDto.class);
             return GeneralResponse.getResponse(HttpStatus.CREATED, "Success", sponsorshipDtoResponse);
+        } catch (HttpError e) {
+            return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
+        }
+    }
+
+    @PutMapping("/renew/{id}")
+    public ResponseEntity<GeneralResponse> renewSponsorship(@PathVariable UUID id, @RequestBody @Valid RenewSponsorshipDto renewDto) {
+        try {
+            var sponsorship = sponsorshipService.renewSponsorship(id, renewDto);
+            FindSponsorshipDto sponsorshipDtoResponse = modelMapper.map(sponsorship, FindSponsorshipDto.class);
+            return GeneralResponse.getResponse(HttpStatus.OK, "Sponsorship renewed successfully", sponsorshipDtoResponse);
         } catch (HttpError e) {
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
         }

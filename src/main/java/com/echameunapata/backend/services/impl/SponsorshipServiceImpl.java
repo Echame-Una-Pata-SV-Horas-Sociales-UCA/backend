@@ -1,6 +1,7 @@
 package com.echameunapata.backend.services.impl;
 
 import com.echameunapata.backend.domain.dtos.sponsorship.RegisterSponsorshipDto;
+import com.echameunapata.backend.domain.dtos.sponsorship.RenewSponsorshipDto;
 import com.echameunapata.backend.domain.enums.reports.ReportStatus;
 import com.echameunapata.backend.domain.enums.sponsorship.SponsorshipStatus;
 import com.echameunapata.backend.domain.models.Animal;
@@ -44,16 +45,88 @@ public class SponsorshipServiceImpl implements ISponsorshipService {
             var animal = animalService.findById(sponsorshipDto.getAnimalId());
             var person = personService.createPerson(sponsorshipDto.getSponsor());
 
-            var sponsorship  = buildSponsorship(sponsorshipDto, animal, person);
+            // Check if there's already a sponsorship for this person-animal combination
+            var existingSponsorship = sponsorshipRepository.findBySponsorAndAnimal(person, animal);
 
-            // Validate the new sponsorship status before saving
-            validateSingleSponsorship(sponsorship);
+            Sponsorship sponsorship;
+            if (existingSponsorship.isPresent()) {
+                // Update the existing sponsorship instead of creating a new one
+                sponsorship = existingSponsorship.get();
+                sponsorship.setMonthlyAmount(sponsorshipDto.getMonthlyAmount());
+                sponsorship.setStartDate(sponsorshipDto.getStartDate());
+
+                // Calculate new endDate as startDate + 1 month
+                LocalDate start = LocalDate.parse(sponsorshipDto.getStartDate());
+                String endDate = start.plusMonths(1).toString();
+                sponsorship.setEndDate(endDate);
+
+                sponsorship.setNotes(sponsorshipDto.getNotes());
+                sponsorship.setSponsorshipStatus(SponsorshipStatus.ACTIVE);
+            } else {
+                // Create a new sponsorship if none exists
+                sponsorship = buildSponsorship(sponsorshipDto, animal, person);
+                // Validate the new sponsorship status before saving
+                validateSingleSponsorship(sponsorship);
+            }
 
             sponsorship = sponsorshipRepository.save(sponsorship);
             schedulePayments(animal, person, sponsorship);
 
             return sponsorship;
         }catch (HttpError e){
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Sponsorship renewSponsorship(UUID id, RenewSponsorshipDto renewDto) {
+        try {
+            // Find the existing sponsorship
+            var sponsorship = sponsorshipRepository.findById(id).orElse(null);
+            if (sponsorship == null) {
+                throw new HttpError(HttpStatus.NOT_FOUND, "This sponsorship does not exist");
+            }
+
+            // Update the sponsorship with new contribution data
+            sponsorship.setMonthlyAmount(renewDto.getMonthlyAmount());
+
+            // Use provided startDate or current date if not provided
+            String startDate = (renewDto.getStartDate() != null && !renewDto.getStartDate().isBlank())
+                ? renewDto.getStartDate()
+                : LocalDate.now().toString();
+            sponsorship.setStartDate(startDate);
+
+            // Calculate new endDate as startDate + 1 month
+            LocalDate start = LocalDate.parse(startDate);
+            String endDate = start.plusMonths(1).toString();
+            sponsorship.setEndDate(endDate);
+
+            // Update notes if provided
+            if (renewDto.getNotes() != null && !renewDto.getNotes().isBlank()) {
+                sponsorship.setNotes(renewDto.getNotes());
+            }
+
+            // Set status to ACTIVE
+            sponsorship.setSponsorshipStatus(SponsorshipStatus.ACTIVE);
+
+            // Save the updated sponsorship
+            sponsorship = sponsorshipRepository.save(sponsorship);
+
+            // Reload the sponsorship with all relationships for proper DTO mapping
+            sponsorship = sponsorshipRepository.findById(sponsorship.getId()).orElse(sponsorship);
+
+//            // Schedule new payments
+//            try {
+//                schedulePayments(sponsorship.getAnimal(), sponsorship.getSponsor(), sponsorship);
+//            } catch (Exception e) {
+//                // Log the error but don't fail the update if calendar scheduling fails
+//                System.err.println("Failed to schedule payments: " + e.getMessage());
+//            }
+
+            return sponsorship;
+        } catch (HttpError e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);

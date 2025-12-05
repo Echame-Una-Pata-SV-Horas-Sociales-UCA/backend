@@ -1,6 +1,8 @@
 package com.echameunapata.backend.repositories;
 
 import com.echameunapata.backend.domain.enums.sponsorship.SponsorshipStatus;
+import com.echameunapata.backend.domain.models.Animal;
+import com.echameunapata.backend.domain.models.Person;
 import com.echameunapata.backend.domain.models.Sponsorship;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -26,5 +28,8 @@ public interface SponsorshipRepository extends JpaRepository<Sponsorship, UUID> 
     @EntityGraph(attributePaths = {"sponsor", "animal", "animal.photos"})
     @NonNull
     Optional<Sponsorship> findById(@NonNull UUID id);
+
+    @EntityGraph(attributePaths = {"sponsor", "animal"})
+    Optional<Sponsorship> findBySponsorAndAnimal(Person sponsor, Animal animal);
 
 }
