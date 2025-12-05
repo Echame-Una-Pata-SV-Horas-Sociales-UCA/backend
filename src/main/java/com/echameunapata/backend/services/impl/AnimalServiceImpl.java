@@ -182,43 +182,49 @@ public class AnimalServiceImpl implements IAnimalService {
     }
 
     /**
-     * Extrae el public_id de una URL de Cloudinary.
-     * Ejemplo: https://res.cloudinary.com/demo/image/upload/v1234567890/echameunapata/animals/firulais.jpg
-     * Extrae: echameunapata/animals/firulais
+     * Robustly extracts the Cloudinary public_id from a public URL.
+     * Handles versioning, transformations, file extension, and query parameters.
      *
-     * @param url URL completa del archivo en Cloudinary
-     * @return El public_id extraído o null si no se puede extraer
+     * Examples:
+     * https://res.cloudinary.com/demo/image/upload/v1234567890/echameunapata/animals/firulais.jpg
+     *   -> echameunapata/animals/firulais
+     * https://res.cloudinary.com/demo/image/upload/w_100,h_100,c_thumb/v1234567890/echameunapata/animals/firulais.jpg?_a=ABC
+     *   -> echameunapata/animals/firulais
      */
     private String extractPublicIdFromUrl(String url) {
-        try {
-            // La estructura típica es: .../upload/[transformations]/public_id.extension
-            // Buscamos después de "/upload/" y antes de la extensión
-            int uploadIndex = url.indexOf("/upload/");
-            if (uploadIndex == -1) {
-                return null;
-            }
+        if (url == null) return null;
+        int uploadIdx = url.indexOf("/upload/");
+        if (uploadIdx == -1) return null;
+        String afterUpload = url.substring(uploadIdx + 8); // after '/upload/'
 
-            // Extraer la parte después de /upload/
-            String afterUpload = url.substring(uploadIndex + 8); // 8 = length of "/upload/"
-
-            // Si hay transformaciones (v1234567890), las omitimos
-            if (afterUpload.startsWith("v")) {
-                int slashIndex = afterUpload.indexOf('/');
-                if (slashIndex != -1) {
-                    afterUpload = afterUpload.substring(slashIndex + 1);
-                }
-            }
-
-            // Eliminar la extensión del archivo
-            int lastDotIndex = afterUpload.lastIndexOf('.');
-            if (lastDotIndex != -1) {
-                return afterUpload.substring(0, lastDotIndex);
-            }
-
-            return afterUpload;
-        } catch (Exception e) {
-            return null;
+        // Remove query parameters
+        int queryIdx = afterUpload.indexOf('?');
+        if (queryIdx != -1) {
+            afterUpload = afterUpload.substring(0, queryIdx);
         }
+
+        // Remove transformations (anything before first folder or version)
+        // Find first slash after possible transformations
+        int firstFolderIdx = afterUpload.indexOf('/');
+        if (firstFolderIdx != -1 && firstFolderIdx < 15) { // transformations are usually short
+            afterUpload = afterUpload.substring(firstFolderIdx + 1);
+        }
+
+        // Remove version (e.g., v1234567890/)
+        if (afterUpload.startsWith("v") && afterUpload.length() > 2 && Character.isDigit(afterUpload.charAt(1))) {
+            int slashIdx = afterUpload.indexOf('/');
+            if (slashIdx != -1) {
+                afterUpload = afterUpload.substring(slashIdx + 1);
+            }
+        }
+
+        // Remove file extension
+        int dotIdx = afterUpload.lastIndexOf('.');
+        if (dotIdx != -1) {
+            afterUpload = afterUpload.substring(0, dotIdx);
+        }
+
+        return afterUpload;
     }
 
     /**
