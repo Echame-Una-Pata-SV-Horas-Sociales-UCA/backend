@@ -67,7 +67,7 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
             AdoptionApplication newApplication = applicationRepository.save(application);
 
             saveAdoptionReferences(applicationDto.getReferences(), newApplication);
-            processStatusChange(application);
+//            processStatusChange(application);
 
             return newApplication;
         }catch (HttpError e){
@@ -169,6 +169,11 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
             var application = findApplicationById(applicationDto.getId());
 
             AdoptionStatus newStatus = AdoptionStatus.fromString(applicationDto.getStatus());
+
+            if (!newStatus.toString().equalsIgnoreCase(applicationDto.getStatus())){
+                throw new HttpError(HttpStatus.BAD_REQUEST, "Invalid status value: " + applicationDto.getStatus());
+            }
+
             validateStatusTransition(application.getStatus(), newStatus);
             application.setStatus(newStatus);
 

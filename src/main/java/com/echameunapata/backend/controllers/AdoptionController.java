@@ -33,7 +33,7 @@ public class AdoptionController {
             List<FindAdoptionDto> dtoPage = adoptions.stream().map(application -> modelMapper.map(application, FindAdoptionDto.class)).toList();
 
 
-            return GeneralResponse.getResponse(HttpStatus.OK, "Success all reports", dtoPage);
+            return GeneralResponse.getResponse(HttpStatus.OK, "Success", dtoPage);
 
         }catch (HttpError e){
             return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
