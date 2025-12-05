@@ -123,9 +123,8 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
     public List<AdoptionApplication> findAllApplications(String status, Instant startDate, Instant endDate) {
         try{
             AdoptionStatus adoptionStatus = (status != null && !status.isBlank()) ? AdoptionStatus.fromString(status) : null;
-            List<AdoptionApplication> applications = applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate,true );
-
-            return applications;
+            // Pass null for isApplication to return all applications
+            return applicationRepository.findApplicationsByFilters(adoptionStatus, startDate, endDate, null);
         }catch (HttpError e){
             throw e;
         }
