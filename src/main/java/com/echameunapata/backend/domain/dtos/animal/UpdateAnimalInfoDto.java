@@ -1,27 +1,28 @@
 package com.echameunapata.backend.domain.dtos.animal;
 
 import com.echameunapata.backend.domain.enums.animals.AnimalSex;
+import com.echameunapata.backend.domain.enums.animals.AnimalSpecies;
 import com.echameunapata.backend.domain.enums.animals.AnimalState;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
 @Data
 public class UpdateAnimalInfoDto {
 
-    @NotBlank(message = "Name cannot be empty")
     private String name;
-
+    private AnimalSpecies species;
     private AnimalSex sex;
     private String race;
 
     private AnimalState state;
+    private String age;
     private LocalDate rescueDate;
     private String rescueLocation;
-
-    private Boolean sterilized = false;
+    private String initialDescription;
+    private Boolean sterilized;
     private Boolean missingLimb;
-
     private String observations;
+    private MultipartFile photo;
 }
