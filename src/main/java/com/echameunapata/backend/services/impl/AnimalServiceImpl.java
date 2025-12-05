@@ -98,23 +98,126 @@ public class AnimalServiceImpl implements IAnimalService {
      *
      * Este método busca el animal por su ID, valida su existencia
      * y actualiza únicamente la información enviada desde el DTO.
+     * Si se proporciona una nueva foto, elimina la anterior del servidor
+     * y sube la nueva.
      *
      * @param animalId identificador único del animal a actualizar.
      * @param animalInfoDto información nueva del animal.
      * @throws HttpError Si el animal no existe o ocurre un error inesperado.
+     * @throws IOException Si ocurre un error al subir o eliminar la foto.
      */
     @Override
-    public void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto) {
+    public void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto) throws IOException {
         try{
             var animal = animalRepository.findById(animalId).orElse(null);
             if(animal == null){
                 throw new HttpError(HttpStatus.NOT_FOUND, "This animal not exists");
             }
 
-            modelMapper.map(animalInfoDto, animal);
+            // Update fields only if they are provided (not null)
+            if(animalInfoDto.getName() != null){
+                // Check if name is already in use by another animal
+                Animal existingAnimal = animalRepository.findByName(animalInfoDto.getName());
+                if(existingAnimal != null && !existingAnimal.getId().equals(animalId)){
+                    throw new HttpError(HttpStatus.CONFLICT, "Name of the animal already in use");
+                }
+                animal.setName(animalInfoDto.getName());
+            }
+            if(animalInfoDto.getSpecies() != null){
+                animal.setSpecies(animalInfoDto.getSpecies());
+            }
+            if(animalInfoDto.getSex() != null){
+                animal.setSex(animalInfoDto.getSex());
+            }
+            if(animalInfoDto.getRace() != null){
+                animal.setRace(animalInfoDto.getRace());
+            }
+            if(animalInfoDto.getAge() != null){
+                animal.setAge(animalInfoDto.getAge());
+            }
+            if(animalInfoDto.getRescueDate() != null){
+                animal.setRescueDate(animalInfoDto.getRescueDate());
+            }
+            if(animalInfoDto.getRescueLocation() != null){
+                animal.setRescueLocation(animalInfoDto.getRescueLocation());
+            }
+            if(animalInfoDto.getInitialDescription() != null){
+                animal.setInitialDescription(animalInfoDto.getInitialDescription());
+            }
+            if(animalInfoDto.getSterilized() != null){
+                animal.setSterilized(animalInfoDto.getSterilized());
+            }
+            if(animalInfoDto.getMissingLimb() != null){
+                animal.setMissingLimb(animalInfoDto.getMissingLimb());
+            }
+            if(animalInfoDto.getObservations() != null){
+                animal.setObservations(animalInfoDto.getObservations());
+            }
+
+            // Handle photo update: delete old photo and upload new one
+            if(animalInfoDto.getPhoto() != null && !animalInfoDto.getPhoto().isEmpty()){
+                // Delete old photo if exists
+                if(animal.getPhoto() != null && !animal.getPhoto().isEmpty()){
+                    // Extract public_id from the URL
+                    String publicId = extractPublicIdFromUrl(animal.getPhoto());
+                    if(publicId != null){
+                        fileStorageService.deleteFile(publicId);
+                    }
+                }
+
+                // Upload new photo
+                String newPhotoUrl = fileStorageService.uploadFile(
+                    animalInfoDto.getPhoto(),
+                    "animals/" + animal.getName()
+                );
+                animal.setPhoto(newPhotoUrl);
+            }
+
             animalRepository.save(animal);
-        }catch (Exception e){
+        }catch (HttpError e){
             throw e;
+        }catch (IOException e){
+            throw e;
+        }
+    }
+
+    /**
+     * Extrae el public_id de una URL de Cloudinary.
+     * Ejemplo: https://res.cloudinary.com/demo/image/upload/v1234567890/echameunapata/animals/firulais.jpg
+     * Extrae: echameunapata/animals/firulais
+     *
+     * @param url URL completa del archivo en Cloudinary
+     * @return El public_id extraído o null si no se puede extraer
+     */
+    private String extractPublicIdFromUrl(String url) {
+        try {
+            // La estructura típica es: .../upload/[transformations]/public_id.extension
+            // Buscamos después de "/upload/" y antes de la extensión
+            int uploadIndex = url.indexOf("/upload/");
+            if (uploadIndex == -1) {
+                return null;
+            }
+
+            // Extraer la parte después de /upload/
+            String afterUpload = url.substring(uploadIndex + 8); // 8 = length of "/upload/"
+
+            // Si hay transformaciones (v1234567890), las omitimos
+            if (afterUpload.startsWith("v")) {
+                int slashIndex = afterUpload.indexOf('/');
+                if (slashIndex != -1) {
+                    afterUpload = afterUpload.substring(slashIndex + 1);
+                }
+            }
+
+            // Eliminar la extensión del archivo
+            int lastDotIndex = afterUpload.lastIndexOf('.');
+            if (lastDotIndex != -1) {
+                return afterUpload.substring(0, lastDotIndex);
+            }
+
+            return afterUpload;
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -2,6 +2,7 @@ package com.echameunapata.backend.controllers;
 
 import com.echameunapata.backend.domain.dtos.animal.FindAnimalDto;
 import com.echameunapata.backend.domain.dtos.animal.RegisterAnimalDto;
+import com.echameunapata.backend.domain.dtos.animal.UpdateAnimalInfoDto;
 import com.echameunapata.backend.domain.dtos.commons.GeneralResponse;
 import com.echameunapata.backend.domain.models.Animal;
 import com.echameunapata.backend.exceptions.HttpError;
@@ -37,6 +38,49 @@ public class AnimalController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<GeneralResponse> updateAnimal(
+            @PathVariable("id") UUID id,
+            @ModelAttribute UpdateAnimalInfoDto updateDto){
+        try{
+            // Validate that at least one field is provided
+            if (isUpdateDtoEmpty(updateDto)) {
+                return GeneralResponse.getResponse(HttpStatus.BAD_REQUEST, "No fields provided to update");
+            }
+
+            animalService.updateAnimalInformation(id, updateDto);
+            Animal updatedAnimal = animalService.findById(id);
+            FindAnimalDto resp = modelMapper.map(updatedAnimal, FindAnimalDto.class);
+
+            return GeneralResponse.getResponse(HttpStatus.OK, "Animal updated successfully", resp);
+        }catch (HttpError e){
+            return GeneralResponse.getResponse(e.getStatus(), e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Verifica si el DTO de actualización está vacío (sin campos para actualizar).
+     *
+     * @param dto DTO con la información a actualizar
+     * @return true si todos los campos son null o vacíos, false si hay al menos un campo
+     */
+    private boolean isUpdateDtoEmpty(UpdateAnimalInfoDto dto) {
+        return dto.getName() == null &&
+               dto.getSpecies() == null &&
+               dto.getSex() == null &&
+               dto.getRace() == null &&
+               dto.getAge() == null &&
+               dto.getRescueDate() == null &&
+               dto.getRescueLocation() == null &&
+               dto.getInitialDescription() == null &&
+               dto.getSterilized() == null &&
+               dto.getMissingLimb() == null &&
+               dto.getObservations() == null &&
+               (dto.getPhoto() == null || dto.getPhoto().isEmpty());
     }
 
     @GetMapping("/find-all")

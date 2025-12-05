@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface IAnimalService {
     Animal registerAnimal(RegisterAnimalDto animalDto) throws IOException;
-    void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto);
+    void updateAnimalInformation(UUID animalId, UpdateAnimalInfoDto animalInfoDto) throws IOException;
     List<Animal> findAllAnimals(String stateString, String sexString);
     Animal findById(UUID animalId);
     Animal findByName(String name);
