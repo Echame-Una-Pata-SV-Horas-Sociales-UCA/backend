@@ -24,9 +24,6 @@ public class RegisterSponsorshipDto {
     @NotNull(message = "La fecha de inicio es obligatoria.")
     private String startDate;
 
-    @NotNull(message = "La fecha de fin es obligatoria.")
-    private String endDate;
-
     private String notes;
 
     @NotNull(message = "Debe insertar los datos del patrocinador.")
