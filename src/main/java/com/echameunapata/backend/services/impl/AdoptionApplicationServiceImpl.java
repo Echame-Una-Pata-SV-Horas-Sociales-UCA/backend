@@ -69,7 +69,8 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
             saveAdoptionReferences(applicationDto.getReferences(), newApplication);
 //            processStatusChange(application);
 
-            return newApplication;
+            // Re-fetch with relations to ensure person and animal are loaded for ModelMapper
+            return findApplicationById(newApplication.getId());
         }catch (HttpError e){
             throw  e;
         }
@@ -183,10 +184,11 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
                 application.setIsApplication(false);
             }
 
-            AdoptionApplication saved = applicationRepository.save(application);
+            applicationRepository.save(application);
             processStatusChange(application);
 
-            return saved;
+            // Re-fetch with relations to ensure person and animal are loaded for ModelMapper
+            return findApplicationById(application.getId());
         }catch (HttpError e){
             throw e;
         }
