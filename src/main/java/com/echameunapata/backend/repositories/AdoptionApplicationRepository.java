@@ -23,6 +23,15 @@ public interface AdoptionApplicationRepository extends JpaRepository<AdoptionApp
           AND (:status IS NULL OR a.status = :status)
           AND (COALESCE(:startDate, a.applicationDate) <= a.applicationDate)
           AND (COALESCE(:endDate, a.applicationDate) >= a.applicationDate)
+        ORDER BY 
+          CASE a.status
+            WHEN 'PENDING' THEN 1
+            WHEN 'IN_REVIEW' THEN 2
+            WHEN 'ACCEPTED' THEN 3
+            WHEN 'REJECTED' THEN 4
+            ELSE 5
+          END,
+          a.applicationDate DESC
     """)
     List<AdoptionApplication> findApplicationsByFilters(
             @Param("status") AdoptionStatus status,
