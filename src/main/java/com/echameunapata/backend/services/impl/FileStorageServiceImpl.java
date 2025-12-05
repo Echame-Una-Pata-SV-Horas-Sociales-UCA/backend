@@ -58,9 +58,13 @@ public class FileStorageServiceImpl implements IFileStorageService {
 
     @Override
     public Map<String, Object> deleteFile(String publicId) throws IOException {
+        // Cloudinary expects publicId in the format: folder/filename (no extension, no version)
         try {
-            // Elimina el archivo usando su public_id
-            return (Map<String, Object>) cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            Map<String, Object> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            if (!"ok".equals(result.get("result"))) {
+                throw new IOException("Cloudinary did not delete the file. Result: " + result);
+            }
+            return result;
         } catch (IOException e) {
             throw new IOException("Error al eliminar el archivo con public_id: " + publicId, e);
         }
