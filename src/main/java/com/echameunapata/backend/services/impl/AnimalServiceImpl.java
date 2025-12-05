@@ -114,6 +114,8 @@ public class AnimalServiceImpl implements IAnimalService {
                 throw new HttpError(HttpStatus.NOT_FOUND, "This animal not exists");
             }
 
+            boolean changed = false;
+
             // Update fields only if they are provided (not null)
             if(animalInfoDto.getName() != null){
                 // Check if name is already in use by another animal
@@ -122,36 +124,87 @@ public class AnimalServiceImpl implements IAnimalService {
                     throw new HttpError(HttpStatus.CONFLICT, "Name of the animal already in use");
                 }
                 animal.setName(animalInfoDto.getName());
+                changed = true;
             }
             if(animalInfoDto.getSpecies() != null){
                 animal.setSpecies(animalInfoDto.getSpecies());
+                changed = true;
             }
             if(animalInfoDto.getSex() != null){
-                animal.setSex(animalInfoDto.getSex());
+                // AnimalSex validation
+                boolean validSex = false;
+                for (AnimalSex s : AnimalSex.values()) {
+                    if (s == animalInfoDto.getSex()) {
+                        validSex = true;
+                        break;
+                    }
+                }
+                if (!validSex) {
+                    throw new HttpError(HttpStatus.BAD_REQUEST, "Invalid animal sex: " + animalInfoDto.getSex());
+                }
+                if(animalInfoDto.getSex() != animal.getSex()){
+                    animal.setSex(animalInfoDto.getSex());
+                    changed = true;
+                }
             }
             if(animalInfoDto.getRace() != null){
                 animal.setRace(animalInfoDto.getRace());
+                changed = true;
             }
             if(animalInfoDto.getAge() != null){
-                animal.setAge(animalInfoDto.getAge());
+                // Age validation
+                try {
+                    int ageInt = Integer.parseInt(animalInfoDto.getAge().trim());
+                    if (ageInt < 0) {
+                        throw new HttpError(HttpStatus.BAD_REQUEST, "Animal age cannot be negative: " + animalInfoDto.getAge());
+                    }
+                } catch (NumberFormatException e) {
+                    throw new HttpError(HttpStatus.BAD_REQUEST, "Animal age must be a valid integer: " + animalInfoDto.getAge());
+                }
+                if(!animalInfoDto.getAge().equals(animal.getAge())){
+                    animal.setAge(animalInfoDto.getAge());
+                    changed = true;
+                }
             }
             if(animalInfoDto.getRescueDate() != null){
                 animal.setRescueDate(animalInfoDto.getRescueDate());
+                changed = true;
             }
             if(animalInfoDto.getRescueLocation() != null){
                 animal.setRescueLocation(animalInfoDto.getRescueLocation());
+                changed = true;
             }
             if(animalInfoDto.getInitialDescription() != null){
                 animal.setInitialDescription(animalInfoDto.getInitialDescription());
+                changed = true;
             }
             if(animalInfoDto.getSterilized() != null){
                 animal.setSterilized(animalInfoDto.getSterilized());
+                changed = true;
             }
             if(animalInfoDto.getMissingLimb() != null){
                 animal.setMissingLimb(animalInfoDto.getMissingLimb());
+                changed = true;
             }
             if(animalInfoDto.getObservations() != null){
                 animal.setObservations(animalInfoDto.getObservations());
+                changed = true;
+            }
+            if(animalInfoDto.getState() != null) {
+                boolean validState = false;
+                for (AnimalState s : AnimalState.values()) {
+                    if (s == animalInfoDto.getState()) {
+                        validState = true;
+                        break;
+                    }
+                }
+                if (!validState) {
+                    throw new HttpError(HttpStatus.BAD_REQUEST, "Invalid animal state: " + animalInfoDto.getState());
+                }
+                if(animalInfoDto.getState() != animal.getState()){
+                    animal.setState(animalInfoDto.getState());
+                    changed = true;
+                }
             }
 
             // Handle photo update: delete old photo and upload new one
@@ -171,9 +224,12 @@ public class AnimalServiceImpl implements IAnimalService {
                     "animals/" + animal.getName()
                 );
                 animal.setPhoto(newPhotoUrl);
+                changed = true;
             }
 
-            animalRepository.save(animal);
+            if(changed){
+                animalRepository.save(animal);
+            }
         }catch (HttpError e){
             throw e;
         }catch (IOException e){
