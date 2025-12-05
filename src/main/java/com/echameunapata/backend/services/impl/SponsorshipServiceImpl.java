@@ -46,6 +46,9 @@ public class SponsorshipServiceImpl implements ISponsorshipService {
 
             var sponsorship  = buildSponsorship(sponsorshipDto, animal, person);
 
+            // Validate the new sponsorship status before saving
+            validateSingleSponsorship(sponsorship);
+
             sponsorship = sponsorshipRepository.save(sponsorship);
             schedulePayments(animal, person, sponsorship);
 
@@ -83,13 +86,48 @@ public class SponsorshipServiceImpl implements ISponsorshipService {
         return sponsorship;
     }
 
+    /**
+     * Validates and updates the status of a single sponsorship based on its dates.
+     * This is used when creating a new sponsorship to ensure it has the correct status.
+     */
+    private void validateSingleSponsorship(Sponsorship sponsorship) {
+        LocalDate today = LocalDate.now();
+        LocalDate endDate = LocalDate.parse(sponsorship.getEndDate());
+
+        // If endDate has passed, check if it should be PENDING or INACTIVE
+        if (endDate.isBefore(today)) {
+            LocalDate inactiveThreshold = endDate.plusMonths(2); // 2 months after endDate
+
+            if (today.isAfter(inactiveThreshold) || today.isEqual(inactiveThreshold)) {
+                // More than 2 months have passed since endDate
+                sponsorship.setSponsorshipStatus(SponsorshipStatus.INACTIVE);
+            } else {
+                // Between endDate and endDate + 2 months
+                sponsorship.setSponsorshipStatus(SponsorshipStatus.PENDING);
+            }
+        }
+        // If endDate hasn't passed, keep it as ACTIVE (default)
+    }
+
     public void validSponsorShips() {
-        List<Sponsorship> sponsorships = sponsorshipRepository.findAllBySponsorshipStatus(SponsorshipStatus.ACTIVE);
         LocalDate today = LocalDate.now(); // fecha actual
 
-        sponsorships.forEach(s -> {
-            LocalDate endDate = LocalDate.parse(s.getEndDate()); // convertir String → fecha
+        // Check ACTIVE sponsorships and set to PENDING if endDate has passed
+        List<Sponsorship> activeSponsorships = sponsorshipRepository.findAllBySponsorshipStatus(SponsorshipStatus.ACTIVE);
+        activeSponsorships.forEach(s -> {
+            LocalDate endDate = LocalDate.parse(s.getEndDate());
             if (endDate.isBefore(today)) {
+                s.setSponsorshipStatus(SponsorshipStatus.PENDING);
+                sponsorshipRepository.save(s);
+            }
+        });
+
+        // Check PENDING sponsorships and set to INACTIVE if 2 months have passed since endDate
+        List<Sponsorship> pendingSponsorships = sponsorshipRepository.findAllBySponsorshipStatus(SponsorshipStatus.PENDING);
+        pendingSponsorships.forEach(s -> {
+            LocalDate endDate = LocalDate.parse(s.getEndDate());
+            LocalDate inactiveThreshold = endDate.plusMonths(2); // 2 months after endDate
+            if (today.isAfter(inactiveThreshold) || today.isEqual(inactiveThreshold)) {
                 s.setSponsorshipStatus(SponsorshipStatus.INACTIVE);
                 sponsorshipRepository.save(s);
             }
@@ -99,6 +137,9 @@ public class SponsorshipServiceImpl implements ISponsorshipService {
     @Override
     public List<Sponsorship> findAllSponsorshipByFilters(String statusString) {
         try{
+            // Validate and update expired sponsorships before returning the list
+            validSponsorShips();
+
             SponsorshipStatus status = (statusString != null && !statusString.isBlank()) ? SponsorshipStatus.fromString(statusString) : null;
 
             if(status == null){
@@ -118,6 +159,10 @@ public class SponsorshipServiceImpl implements ISponsorshipService {
             if (sponsorship == null){
                 throw new HttpError(HttpStatus.NOT_FOUND, "This sponsorship not exists");
             }
+
+            // Validate only this specific sponsorship before returning
+            validateSingleSponsorship(sponsorship);
+            sponsorshipRepository.save(sponsorship);
 
             return sponsorship;
         }catch (HttpError e){
