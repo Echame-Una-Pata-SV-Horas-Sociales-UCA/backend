@@ -1,5 +1,6 @@
 package com.echameunapata.backend.domain.dtos.adoption.application;
 
+import com.echameunapata.backend.domain.dtos.person.PersonDto;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -22,5 +23,7 @@ public class FindApplicationDto {
     private String observations;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    private PersonDto person;
 
 }
