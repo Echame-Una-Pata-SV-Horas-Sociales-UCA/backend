@@ -20,6 +20,13 @@ import java.util.function.Predicate;
 
 @Repository
 public interface AnimalRepository extends JpaRepository<Animal, UUID> {
+    long countByState(AnimalState state);
+
+    @Query("SELECT YEAR(a.rescueDate) as year, COUNT(a) as count FROM Animal a GROUP BY YEAR(a.rescueDate)")
+    List<Object[]> countRescuesByYear();
+
+    long countByAdoptionIsNotNull();
+
     Animal findByName(String name);
     List<Animal>findAllByState(AnimalState state);
 
