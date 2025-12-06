@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.echameunapata.backend.services.contract.IFileStorageService;
+import com.echameunapata.backend.utils.validation.FileValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,8 @@ public class FileStorageServiceImpl implements IFileStorageService {
 
     @Override
     public String uploadFile(MultipartFile file, String folderName) throws IOException {
+        // Validate file before uploading
+        FileValidator.validateFile(file);
         // 'echameunapata' actúa como carpeta raíz para mantener orden en tu nube
         String fullPath = "echameunapata/" + folderName;
 

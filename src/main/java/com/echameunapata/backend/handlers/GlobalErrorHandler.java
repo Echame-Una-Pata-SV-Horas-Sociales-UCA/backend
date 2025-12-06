@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.ConcurrentModificationException;
@@ -59,6 +61,29 @@ public class GlobalErrorHandler {
     @ExceptionHandler(HttpError.class)
     public ResponseEntity<GeneralResponse> httpErrorHandler(HttpError ex) {
         return GeneralResponse.getResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<GeneralResponse> maxUploadSizeExceededHandler(MaxUploadSizeExceededException ex) {
+        return GeneralResponse.getResponse(
+                HttpStatus.BAD_REQUEST,
+                "File size exceeds the maximum allowed size of 1 MB. Please upload a smaller file."
+        );
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<GeneralResponse> multipartExceptionHandler(MultipartException ex) {
+        String message = ex.getMessage();
+        if (message != null && message.contains("MaxUploadSizeExceededException")) {
+            return GeneralResponse.getResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "File size exceeds the maximum allowed size of 1 MB. Please upload a smaller file."
+            );
+        }
+        return GeneralResponse.getResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid file upload request. Please ensure you're uploading a valid image file (JPEG, PNG, GIF, or WEBP) smaller than 1 MB."
+        );
     }
 
     @ExceptionHandler(ConcurrentModificationException.class)

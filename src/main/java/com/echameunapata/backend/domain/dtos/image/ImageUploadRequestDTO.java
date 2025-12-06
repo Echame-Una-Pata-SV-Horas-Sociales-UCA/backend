@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ImageUploadRequestDTO {
-    @NotNull
+    @NotNull(message = "File is required. Allowed formats: JPEG, PNG, GIF, WEBP. Maximum size: 1 MB")
     private MultipartFile file;
 
     @NotBlank

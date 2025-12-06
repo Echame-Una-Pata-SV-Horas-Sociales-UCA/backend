@@ -1,8 +1,6 @@
 package com.echameunapata.backend.domain.dtos.reports;
 
 import com.echameunapata.backend.domain.dtos.person.CreatePersonDto;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +20,6 @@ public class CreateReportDto {
     private String contactEmail;
 
     private CreatePersonDto person;
-    @NotNull
+    @NotNull(message = "Photo is required. Allowed formats: JPEG, PNG, GIF, WEBP. Maximum size: 1 MB")
     private MultipartFile photo;
 }
