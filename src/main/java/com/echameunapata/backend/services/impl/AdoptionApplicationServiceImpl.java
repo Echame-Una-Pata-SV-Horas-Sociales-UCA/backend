@@ -176,13 +176,12 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
 
             validateStatusTransition(application.getStatus(), newStatus);
             application.setStatus(newStatus);
+            String newObservationEntry = formatObservationEntry(newStatus, applicationDto.getObservations(), application.getObservations());
 
-            application.setObservations(applicationDto.getObservations());
-
-            if (AdoptionStatus.APPROVED.equals(application.getStatus())){
-                application.setIsApplication(false);
-            }
-
+//            if (AdoptionStatus.APPROVED.equals(application.getStatus())){
+//                application.setIsApplication(false);
+//            }
+            application.setObservations(newObservationEntry);
             applicationRepository.save(application);
             processStatusChange(application);
 
@@ -191,6 +190,34 @@ public class AdoptionApplicationServiceImpl implements IAdoptionApplicationServi
         }catch (HttpError e){
             throw e;
         }
+    }
+
+    /**
+     * Genera la observación completa concatenando la nueva con el historial existente.
+     * Si no hay modificación (comentario vacío), devuelve el historial actual tal cual.
+     *
+     * @param status      Nuevo estado de la solicitud
+     * @param observation Nuevo comentario ingresado
+     * @param existingObservations Historial de observaciones previas
+     * @return Observaciones concatenadas listas para setear
+     */
+    private String formatObservationEntry(AdoptionStatus status, String observation, String existingObservations) {
+        // Si no hay comentario nuevo, devuelve el historial tal cual
+        if (observation == null || observation.isBlank()) {
+            return existingObservations;
+        }
+
+        // Generar nueva entrada con fecha
+        String fecha = java.time.LocalDate.now().toString(); // yyyy-MM-dd
+        String newEntry = fecha + " - " + status.toString() + " - " + observation;
+
+        // Si no hay observaciones previas, devuelve solo la nueva
+        if (existingObservations == null || existingObservations.isBlank()) {
+            return newEntry;
+        }
+
+        // Si ya hay observaciones previas, concatena con salto de línea
+        return existingObservations + " , " + newEntry;
     }
 
     private void validateStatusTransition(AdoptionStatus current, AdoptionStatus next) {
