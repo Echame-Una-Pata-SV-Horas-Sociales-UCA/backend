@@ -21,6 +21,7 @@ public class FindApplicationDto {
     private Boolean commitmentToSendPhotos;
 
     private String observations;
+    private String description;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 

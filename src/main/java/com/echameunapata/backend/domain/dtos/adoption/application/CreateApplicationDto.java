@@ -17,6 +17,7 @@ public class CreateApplicationDto {
     private String veterinarianPhone;
     private Boolean commitmentToSterilization;
     private Boolean commitmentToSendPhotos;
+    private String description;
     private CreatePersonDto person;
     private UUID animalId;
     private List<CreateReferenceDto>references;
