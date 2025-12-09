@@ -36,13 +36,13 @@ public class PersonServiceImpl  implements IPersonService {
     @Override
     public Person createPerson(CreatePersonDto personDto) {
         try{
-//            var person = personRepository.findByEmail(personDto.getEmail());
-//            if (person !=null && person.getEmail().equalsIgnoreCase(personDto.getEmail()) && person.getDui().equalsIgnoreCase(personDto.getDui())){
-//                return person;
-//            }
+            var person = personRepository.findByEmail(personDto.getEmail());
+            if (person !=null && person.getEmail().equalsIgnoreCase(personDto.getEmail()) && person.getDui().equalsIgnoreCase(personDto.getDui())){
+                return person;
+            }
 
-            var person = modelMapper.map(personDto, Person.class);
-            return personRepository.save(person);
+            var newPerson = modelMapper.map(personDto, Person.class);
+            return personRepository.save(newPerson);
         }catch (Exception e){
             throw e;
         }
